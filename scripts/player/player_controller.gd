@@ -1,5 +1,5 @@
 ## 玩家控制器
-## 管理玩家的移动、战斗和状态
+## 伪3D/等距视角 - 8方向移动 + 跳跃系统
 
 extends CharacterBody2D
 class_name Player
@@ -11,7 +11,8 @@ signal state_changed(new_state: int)
 signal transformation_changed(transformation_id: String)
 
 # 节点引用
-@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var sprite: Node2D = $SpriteRoot
+@onready var shadow: Node2D = $Shadow
 @onready var collision: CollisionShape2D = $CollisionShape2D
 @onready var hitbox: Area2D = $Hitbox
 @onready var hurtbox: Area2D = $Hurtbox
@@ -22,8 +23,16 @@ var current_state: PlayerState.State = PlayerState.State.IDLE
 var previous_state: PlayerState.State = PlayerState.State.IDLE
 
 # 移动变量
-var direction: float = 1.0  # 1 = 右, -1 = 左
-var was_on_floor: bool = false
+var move_direction: Vector2 = Vector2.ZERO  # 8方向移动
+var facing_direction: Vector2 = Vector2.DOWN  # 面朝方向
+
+# 跳跃变量 (伪3D高度模拟)
+var is_jumping: bool = false
+var jump_height: float = 0.0  # 当前高度
+var jump_velocity: float = 0.0  # 垂直速度
+var max_jump_height: float = 40.0
+var jump_speed: float = 200.0
+var gravity: float = 400.0
 
 # 战斗变量
 var combo_count: int = 0
@@ -33,7 +42,7 @@ var can_combo: bool = false
 
 # 闪避变量
 var dodge_timer: float = 0.0
-var dodge_direction: float = 1.0
+var dodge_direction: Vector2 = Vector2.ZERO
 var is_invincible: bool = false
 
 # 格挡变量
@@ -44,18 +53,10 @@ var perfect_block_timer: float = 0.0
 var available_transformations: Dictionary = {}
 
 func _ready() -> void:
-	# 初始化
 	health_changed.emit(stats.current_health, stats.max_health)
 	stamina_changed.emit(stats.current_stamina, stats.max_stamina)
 
-	# 设置初始位置
-	position = Vector2(240, 200)
-
 func _physics_process(delta: float) -> void:
-	# 应用重力
-	if not is_on_floor():
-		velocity.y += stats.gravity * delta
-
 	# 处理各种状态
 	match current_state:
 		PlayerState.State.IDLE:
@@ -79,6 +80,9 @@ func _physics_process(delta: float) -> void:
 		PlayerState.State.TRANSFORM:
 			_process_transform_state(delta)
 
+	# 更新跳跃物理
+	_update_jump_physics(delta)
+
 	# 更新连招计时器
 	if combo_timer > 0:
 		combo_timer -= delta
@@ -93,22 +97,23 @@ func _physics_process(delta: float) -> void:
 	# 移动
 	move_and_slide()
 
-	# 检测落地
-	if is_on_floor() and not was_on_floor:
-		_on_landed()
-	was_on_floor = is_on_floor()
+	# 更新视觉位置（跳跃高度偏移）
+	_update_visual_position()
 
 #region 状态处理
 
 func _process_idle_state(_delta: float) -> void:
+	# 停止移动
+	velocity = Vector2.ZERO
+
 	# 检测移动输入
-	var input_dir = Input.get_axis("move_left", "move_right")
-	if input_dir != 0:
+	var input = _get_movement_input()
+	if input != Vector2.ZERO:
 		_change_state(PlayerState.State.RUN)
 		return
 
 	# 检测跳跃
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if Input.is_action_just_pressed("jump"):
 		_start_jump()
 		return
 
@@ -131,19 +136,23 @@ func _process_idle_state(_delta: float) -> void:
 		return
 
 func _process_run_state(_delta: float) -> void:
-	# 处理移动
-	var input_dir = Input.get_axis("move_left", "move_right")
-	if input_dir == 0:
+	# 获取移动输入
+	var input = _get_movement_input()
+
+	if input == Vector2.ZERO:
 		_change_state(PlayerState.State.IDLE)
 		return
 
 	# 更新方向和速度
-	direction = sign(input_dir)
-	velocity.x = input_dir * stats.move_speed
-	sprite.flip_h = direction < 0
+	move_direction = input
+	facing_direction = input
+	velocity = input * stats.move_speed
+
+	# 更新朝向动画
+	_update_facing_animation()
 
 	# 检测跳跃
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if Input.is_action_just_pressed("jump"):
 		_start_jump()
 		return
 
@@ -162,39 +171,35 @@ func _process_run_state(_delta: float) -> void:
 
 	# 检测格挡
 	if Input.is_action_pressed("block"):
-		velocity.x = 0
+		velocity = Vector2.ZERO
 		_change_state(PlayerState.State.BLOCK)
 		return
 
 func _process_jump_state(delta: float) -> void:
-	# 空中控制
-	var input_dir = Input.get_axis("move_left", "move_right")
-	velocity.x = input_dir * stats.move_speed * 0.8
+	# 空中移动控制
+	var input = _get_movement_input()
+	if input != Vector2.ZERO:
+		velocity = input * stats.move_speed * 0.7
+		facing_direction = input
+		_update_facing_animation()
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, stats.move_speed * delta)
 
-	if input_dir != 0:
-		direction = sign(input_dir)
-		sprite.flip_h = direction < 0
-
-	# 下落
-	if velocity.y > 0:
-		_change_state(PlayerState.State.FALL)
+	# 检测跳跃攻击
+	if Input.is_action_just_pressed("attack_light"):
+		_start_light_attack()  # 空中攻击
+		return
+	if Input.is_action_just_pressed("attack_heavy"):
+		_start_heavy_attack()  # 空中重攻击
 		return
 
 func _process_fall_state(delta: float) -> void:
-	# 空中控制
-	var input_dir = Input.get_axis("move_left", "move_right")
-	velocity.x = input_dir * stats.move_speed * 0.8
-
-	if input_dir != 0:
-		direction = sign(input_dir)
-		sprite.flip_h = direction < 0
-
-	# 落地
-	if is_on_floor():
-		_change_state(PlayerState.State.IDLE)
+	# 与跳跃状态相同
+	_process_jump_state(delta)
 
 func _process_attack_light_state(delta: float) -> void:
-	velocity.x = move_toward(velocity.x, 0, stats.move_speed * delta * 2)
+	# 攻击时减缓移动
+	velocity = velocity.move_toward(Vector2.ZERO, stats.move_speed * delta * 2)
 
 	# 连招检测
 	if can_combo and Input.is_action_just_pressed("attack_light"):
@@ -209,7 +214,7 @@ func _process_attack_light_state(delta: float) -> void:
 		return
 
 func _process_attack_heavy_state(delta: float) -> void:
-	velocity.x = move_toward(velocity.x, 0, stats.move_speed * delta * 2)
+	velocity = velocity.move_toward(Vector2.ZERO, stats.move_speed * delta * 2)
 
 func _process_dodge_state(delta: float) -> void:
 	dodge_timer -= delta
@@ -220,37 +225,101 @@ func _process_dodge_state(delta: float) -> void:
 	else:
 		is_invincible = false
 
-	# 闪避移动
-	velocity.x = dodge_direction * stats.move_speed * 2
+	# 闪避移动（8方向）
+	velocity = dodge_direction * stats.move_speed * 2
 
 	if dodge_timer <= 0:
 		is_invincible = false
-		velocity.x = 0
+		velocity = Vector2.ZERO
 		_change_state(PlayerState.State.IDLE)
 
 func _process_block_state(_delta: float) -> void:
-	velocity.x = 0
+	velocity = Vector2.ZERO
 
 	# 完美格挡窗口
 	if perfect_block_timer > 0:
 		perfect_block_timer -= _delta
 
+	# 可以在格挡时缓慢移动
+	var input = _get_movement_input()
+	if input != Vector2.ZERO:
+		velocity = input * stats.move_speed * 0.2
+
 	if not Input.is_action_pressed("block"):
 		_change_state(PlayerState.State.IDLE)
 
 func _process_hurt_state(_delta: float) -> void:
-	velocity.x = move_toward(velocity.x, 0, stats.move_speed * 0.5)
+	velocity = velocity.move_toward(Vector2.ZERO, stats.move_speed * 0.5)
 
 func _process_transform_state(_delta: float) -> void:
-	velocity.x = 0
+	velocity = Vector2.ZERO
+
+#endregion
+
+#region 跳跃系统
+
+func _start_jump() -> void:
+	if is_jumping:
+		return
+
+	is_jumping = true
+	jump_velocity = -sqrt(2 * gravity * max_jump_height)  # 计算初速度
+	_change_state(PlayerState.State.JUMP)
+
+func _update_jump_physics(delta: float) -> void:
+	if not is_jumping:
+		return
+
+	# 应用重力
+	jump_velocity += gravity * delta
+	jump_height += jump_velocity * delta
+
+	# 到达最高点
+	if jump_velocity > 0 and current_state == PlayerState.State.JUMP:
+		_change_state(PlayerState.State.FALL)
+
+	# 落地
+	if jump_height >= 0 and jump_velocity > 0:
+		jump_height = 0.0
+		jump_velocity = 0.0
+		is_jumping = false
+
+		# 根据输入决定落地状态
+		var input = _get_movement_input()
+		if input != Vector2.ZERO:
+			_change_state(PlayerState.State.RUN)
+		else:
+			_change_state(PlayerState.State.IDLE)
+
+func _update_visual_position() -> void:
+	# 更新精灵位置（跳跃高度偏移）
+	if sprite:
+		sprite.position.y = -jump_height
+	# 阴影保持在地面
+	if shadow:
+		shadow.modulate.a = 1.0 - (jump_height / max_jump_height) * 0.5
+
+#endregion
+
+#region 输入处理
+
+func _get_movement_input() -> Vector2:
+	var input = Vector2.ZERO
+	input.x = Input.get_axis("move_left", "move_right")
+	input.y = Input.get_axis("move_up", "move_down")
+	return input.normalized()
+
+func _update_facing_animation() -> void:
+	# 根据朝向决定动画
+	# 这里可以添加8方向动画支持
+	if facing_direction.x < 0:
+		sprite.scale.x = -1  # 水平翻转
+	elif facing_direction.x > 0:
+		sprite.scale.x = 1
 
 #endregion
 
 #region 动作触发
-
-func _start_jump() -> void:
-	velocity.y = -stats.jump_force
-	_change_state(PlayerState.State.JUMP)
 
 func _start_light_attack() -> void:
 	is_attacking = true
@@ -265,19 +334,18 @@ func _start_heavy_attack() -> void:
 
 func _start_dodge() -> void:
 	dodge_timer = stats.dodge_duration
-	dodge_direction = direction
+	# 闪避方向：当前移动方向或面朝方向
+	var input = _get_movement_input()
+	if input != Vector2.ZERO:
+		dodge_direction = input
+	else:
+		dodge_direction = facing_direction
 	_change_state(PlayerState.State.DODGE)
 
 func _play_attack_animation() -> void:
 	# 根据连招数播放不同动画
-	match current_state:
-		PlayerState.State.ATTACK_LIGHT:
-			match combo_count:
-				0: sprite.play("attack_light_1")
-				1: sprite.play("attack_light_2")
-				2: sprite.play("attack_light_3")
-		PlayerState.State.ATTACK_HEAVY:
-			sprite.play("attack_heavy")
+	# TODO: 添加动画支持
+	pass
 
 #endregion
 
@@ -288,34 +356,30 @@ func _on_animated_sprite_2d_animation_finished() -> void:
 		PlayerState.State.ATTACK_LIGHT, PlayerState.State.ATTACK_HEAVY:
 			is_attacking = false
 			combo_count = 0
-			_change_state(PlayerState.State.IDLE)
+			# 如果还在跳跃中，保持跳跃状态
+			if is_jumping:
+				_change_state(PlayerState.State.JUMP)
+			else:
+				_change_state(PlayerState.State.IDLE)
 		PlayerState.State.HURT:
 			_change_state(PlayerState.State.IDLE)
 		PlayerState.State.TRANSFORM:
 			_change_state(PlayerState.State.IDLE)
 
-func _on_landed() -> void:
-	if current_state in [PlayerState.State.JUMP, PlayerState.State.FALL]:
-		_change_state(PlayerState.State.IDLE)
-
 #endregion
 
 #region 公共方法
 
-func take_damage(amount: int, knockback_direction: float = 0) -> void:
-	# 无敌帧检测
+func take_damage(amount: int, knockback_dir: Vector2 = Vector2.ZERO) -> void:
 	if is_invincible:
 		return
 
-	# 格挡检测
 	if current_state == PlayerState.State.BLOCK:
 		if perfect_block_timer > 0:
-			# 完美格挡
 			perfect_block_timer = 0
 			_perfect_block()
 			return
 		else:
-			# 普通格挡，减少伤害
 			amount = int(amount * 0.3)
 
 	stats.take_damage(amount)
@@ -324,15 +388,11 @@ func take_damage(amount: int, knockback_direction: float = 0) -> void:
 	if stats.current_health <= 0:
 		die()
 	else:
-		# 击退
-		velocity.x = knockback_direction * 200
-		velocity.y = -100
+		velocity = knockback_dir * 200
 		_change_state(PlayerState.State.HURT)
 
 func die() -> void:
-	# 死亡处理
 	print("玩家死亡")
-	# TODO: 实现死亡动画和重生
 
 func transform_to(transformation_id: String) -> void:
 	if stats.has_transformation(transformation_id):
@@ -345,6 +405,10 @@ func revert_transformation() -> void:
 	_change_state(PlayerState.State.TRANSFORM)
 	transformation_changed.emit("")
 
+func get_ground_position() -> Vector2:
+	# 返回地面位置（用于碰撞检测等）
+	return position
+
 #endregion
 
 #region 私有方法
@@ -353,32 +417,13 @@ func _change_state(new_state: PlayerState.State) -> void:
 	previous_state = current_state
 	current_state = new_state
 	state_changed.emit(new_state)
-
-	# 更新动画
 	_update_animation()
 
 func _update_animation() -> void:
-	match current_state:
-		PlayerState.State.IDLE:
-			sprite.play("idle")
-		PlayerState.State.RUN:
-			sprite.play("run")
-		PlayerState.State.JUMP:
-			sprite.play("jump")
-		PlayerState.State.FALL:
-			sprite.play("fall")
-		PlayerState.State.DODGE:
-			sprite.play("dodge")
-		PlayerState.State.BLOCK:
-			sprite.play("block")
-			perfect_block_timer = stats.perfect_block_window
-		PlayerState.State.HURT:
-			sprite.play("hurt")
-		PlayerState.State.TRANSFORM:
-			sprite.play("transform")
+	# TODO: 添加动画支持
+	pass
 
 func _perfect_block() -> void:
 	print("完美格挡!")
-	# TODO: 完美格挡特效和反击机会
 
 #endregion

@@ -1,53 +1,173 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="PackedScene" uid="uid://c8hbxrxvxwx2j" path="res://scenes/player.tscn" id="1_player"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground"]
-size = Vector2(480, 32)
+[sub_resource type="CircleShape2D" id="CircleShape2D_obstacle"]
+radius = 16.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(16, 270)
 
 [node name="TestLevel" type="Node2D"]
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.15, 0.2, 0.15, 1)
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 position = Vector2(240, 200)
 
-[node name="Ground" type="StaticBody2D" parent="."]
-position = Vector2(240, 254)
+[node name="Obstacle1" type="StaticBody2D" parent="."]
+position = Vector2(120, 150)
 collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
-shape = SubResource("RectangleShape2D_ground")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacle1"]
+shape = SubResource("CircleShape2D_obstacle")
 
-[node name="Sprite2D" type="Sprite2D" parent="Ground"]
-modulate = Color(0.2, 0.2, 0.2, 1)
-scale = Vector2(15, 1)
+[node name="Visual" type="ColorRect" parent="Obstacle1"]
+offset_left = -16.0
+offset_top = -32.0
+offset_right = 16.0
+offset_bottom = 0.0
+color = Color(0.4, 0.3, 0.2, 1)
 
-[node name="Platform" type="StaticBody2D" parent="."]
-position = Vector2(150, 180)
+[node name="ObstacleTop" type="ColorRect" parent="Obstacle1"]
+offset_left = -18.0
+offset_top = -36.0
+offset_right = 18.0
+offset_bottom = -32.0
+color = Color(0.5, 0.4, 0.3, 1)
+
+[node name="Obstacle2" type="StaticBody2D" parent="."]
+position = Vector2(360, 120)
 collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform"]
-shape = SubResource("RectangleShape2D_ground")
-scale = Vector2(0.5, 0.25)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Obstacle2"]
+shape = SubResource("CircleShape2D_obstacle")
 
-[node name="Sprite2D" type="Sprite2D" parent="Platform"]
-modulate = Color(0.3, 0.3, 0.3, 1)
-scale = Vector2(7.5, 0.25)
+[node name="Visual" type="ColorRect" parent="Obstacle2"]
+offset_left = -16.0
+offset_top = -32.0
+offset_right = 16.0
+offset_bottom = 0.0
+color = Color(0.4, 0.3, 0.2, 1)
 
-[node name="Platform2" type="StaticBody2D" parent="."]
-position = Vector2(330, 150)
+[node name="ObstacleTop" type="ColorRect" parent="Obstacle2"]
+offset_left = -18.0
+offset_top = -36.0
+offset_right = 18.0
+offset_bottom = -32.0
+color = Color(0.5, 0.4, 0.3, 1)
+
+[node name="Tree1" type="StaticBody2D" parent="."]
+position = Vector2(400, 200)
 collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Platform2"]
-shape = SubResource("RectangleShape2D_ground")
-scale = Vector2(0.5, 0.25)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tree1"]
+shape = SubResource("CircleShape2D_obstacle")
+scale = Vector2(0.5, 0.5)
 
-[node name="Sprite2D" type="Sprite2D" parent="Platform2"]
-modulate = Color(0.3, 0.3, 0.3, 1)
-scale = Vector2(7.5, 0.25)
+[node name="Trunk" type="ColorRect" parent="Tree1"]
+offset_left = -6.0
+offset_top = -40.0
+offset_right = 6.0
+offset_bottom = 0.0
+color = Color(0.4, 0.25, 0.15, 1)
 
-[node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(240, 135)
-zoom = Vector2(2, 2)
+[node name="Leaves" type="ColorRect" parent="Tree1"]
+offset_left = -20.0
+offset_top = -60.0
+offset_right = 20.0
+offset_bottom = -40.0
+color = Color(0.2, 0.5, 0.2, 1)
+
+[node name="Tree2" type="StaticBody2D" parent="."]
+position = Vector2(80, 80)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Tree2"]
+shape = SubResource("CircleShape2D_obstacle")
+scale = Vector2(0.5, 0.5)
+
+[node name="Trunk" type="ColorRect" parent="Tree2"]
+offset_left = -6.0
+offset_top = -40.0
+offset_right = 6.0
+offset_bottom = 0.0
+color = Color(0.4, 0.25, 0.15, 1)
+
+[node name="Leaves" type="ColorRect" parent="Tree2"]
+offset_left = -20.0
+offset_top = -60.0
+offset_right = 20.0
+offset_bottom = -40.0
+color = Color(0.2, 0.5, 0.2, 1)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(8, 135)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="ColorRect" parent="WallLeft"]
+offset_left = -8.0
+offset_top = -135.0
+offset_right = 8.0
+offset_bottom = 135.0
+color = Color(0.3, 0.25, 0.2, 1)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(472, 135)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Visual" type="ColorRect" parent="WallRight"]
+offset_left = -8.0
+offset_top = -135.0
+offset_right = 8.0
+offset_bottom = 135.0
+color = Color(0.3, 0.25, 0.2, 1)
+
+[node name="WallTop" type="StaticBody2D" parent="."]
+position = Vector2(240, 8)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallTop"]
+shape = SubResource("RectangleShape2D_wall")
+scale = Vector2(30, 1)
+
+[node name="Visual" type="ColorRect" parent="WallTop"]
+offset_left = -240.0
+offset_top = -8.0
+offset_right = 240.0
+offset_bottom = 8.0
+color = Color(0.3, 0.25, 0.2, 1)
+
+[node name="WallBottom" type="StaticBody2D" parent="."]
+position = Vector2(240, 262)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallBottom"]
+shape = SubResource("RectangleShape2D_wall")
+scale = Vector2(30, 1)
+
+[node name="Visual" type="ColorRect" parent="WallBottom"]
+offset_left = -240.0
+offset_top = -8.0
+offset_right = 240.0
+offset_bottom = 8.0
+color = Color(0.3, 0.25, 0.2, 1)

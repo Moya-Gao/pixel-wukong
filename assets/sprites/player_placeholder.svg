@@ -1,0 +1,14 @@
+<svg width="16" height="24" xmlns="http://www.w3.org/2000/svg">
+  <!-- 像素风格悟空占位符 -->
+  <!-- 头部 -->
+  <rect x="2" y="0" width="12" height="8" fill="#ffd700"/>
+  <rect x="4" y="2" width="3" height="2" fill="#ff4500"/>
+  <rect x="9" y="2" width="3" height="2" fill="#ff4500"/>
+
+  <!-- 身体 -->
+  <rect x="2" y="8" width="12" height="10" fill="#8b4513"/>
+
+  <!-- 腿 -->
+  <rect x="2" y="18" width="4" height="6" fill="#4a3520"/>
+  <rect x="10" y="18" width="4" height="6" fill="#4a3520"/>
+</svg>

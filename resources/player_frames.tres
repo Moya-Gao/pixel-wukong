@@ -1,0 +1,100 @@
+[gd_resource type="SpriteFrames" load_steps=14 format=3]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idle"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_run"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jump"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fall"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack_light_1"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack_light_2"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack_light_3"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_attack_heavy"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dodge"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_block"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hurt"]
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_transform"]
+region = Rect2(0, 0, 16, 16)
+
+[resource]
+animations = [{
+"frames": [SubResource("AtlasTexture_idle")],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [SubResource("AtlasTexture_run")],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [SubResource("AtlasTexture_jump")],
+"loop": false,
+"name": &"jump",
+"speed": 5.0
+}, {
+"frames": [SubResource("AtlasTexture_fall")],
+"loop": true,
+"name": &"fall",
+"speed": 5.0
+}, {
+"frames": [SubResource("AtlasTexture_attack_light_1")],
+"loop": false,
+"name": &"attack_light_1",
+"speed": 10.0
+}, {
+"frames": [SubResource("AtlasTexture_attack_light_2")],
+"loop": false,
+"name": &"attack_light_2",
+"speed": 10.0
+}, {
+"frames": [SubResource("AtlasTexture_attack_light_3")],
+"loop": false,
+"name": &"attack_light_3",
+"speed": 10.0
+}, {
+"frames": [SubResource("AtlasTexture_attack_heavy")],
+"loop": false,
+"name": &"attack_heavy",
+"speed": 8.0
+}, {
+"frames": [SubResource("AtlasTexture_dodge")],
+"loop": false,
+"name": &"dodge",
+"speed": 10.0
+}, {
+"frames": [SubResource("AtlasTexture_block")],
+"loop": true,
+"name": &"block",
+"speed": 5.0
+}, {
+"frames": [SubResource("AtlasTexture_hurt")],
+"loop": false,
+"name": &"hurt",
+"speed": 5.0
+}, {
+"frames": [SubResource("AtlasTexture_transform")],
+"loop": false,
+"name": &"transform",
+"speed": 5.0
+}]

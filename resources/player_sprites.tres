@@ -1,0 +1,111 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://bq5qm8x6nvhqq"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/player/idle_1.png" id="idle_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/idle_2.png" id="idle_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/run_1.png" id="run_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/run_2.png" id="run_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/run_3.png" id="run_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/run_4.png" id="run_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/jump_rise.png" id="jump_rise"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/jump_fall.png" id="jump_fall"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/attack_light_1.png" id="attack_light_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/attack_light_2.png" id="attack_light_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/attack_light_3.png" id="attack_light_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/attack_heavy.png" id="attack_heavy"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/dodge.png" id="dodge"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/block.png" id="block"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_2")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("run_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_4")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("jump_rise")
+}],
+"loop": false,
+"name": &"jump_rise",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("jump_fall")
+}],
+"loop": false,
+"name": &"jump_fall",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("attack_light_1")
+}],
+"loop": false,
+"name": &"attack_light_1",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("attack_light_2")
+}],
+"loop": false,
+"name": &"attack_light_2",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("attack_light_3")
+}],
+"loop": false,
+"name": &"attack_light_3",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("attack_heavy")
+}],
+"loop": false,
+"name": &"attack_heavy",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("dodge")
+}],
+"loop": false,
+"name": &"dodge",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("block")
+}],
+"loop": false,
+"name": &"block",
+"speed": 1.0
+}]

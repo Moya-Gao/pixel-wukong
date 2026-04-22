@@ -29,6 +29,7 @@ func _run_all_tests():
 	await _run_test("玩家攻击系统", _test_player_attack)
 	await _run_test("玩家闪避系统", _test_player_dodge)
 	await _run_test("玩家格挡系统", _test_player_block)
+	await _run_test("连招预输入系统", _test_player_combo_queue)
 
 func _run_test(test_name: String, test_func: Callable):
 	current_test_name = test_name
@@ -180,6 +181,30 @@ func _test_player_dodge() -> Variant:
 	if player.is_invincible != false:
 		return "初始状态不应无敌"
 
+	# 测试闪避方向 - 向上闪避
+	player._start_dodge(Vector2.UP)
+	if player.dodge_direction != Vector2.UP:
+		return "向上闪避方向应为 UP，实际为 %s" % player.dodge_direction
+	player._end_dodge()
+
+	# 测试闪避方向 - 向下闪避
+	player._start_dodge(Vector2.DOWN)
+	if player.dodge_direction != Vector2.DOWN:
+		return "向下闪避方向应为 DOWN，实际为 %s" % player.dodge_direction
+	player._end_dodge()
+
+	# 测试闪避方向 - 向左闪避
+	player._start_dodge(Vector2.LEFT)
+	if player.dodge_direction != Vector2.LEFT:
+		return "向左闪避方向应为 LEFT，实际为 %s" % player.dodge_direction
+	player._end_dodge()
+
+	# 测试闪避方向 - 向右闪避
+	player._start_dodge(Vector2.RIGHT)
+	if player.dodge_direction != Vector2.RIGHT:
+		return "向右闪避方向应为 RIGHT，实际为 %s" % player.dodge_direction
+	player._end_dodge()
+
 	# 检查闪避动画
 	var sprite_root = player.get_node_or_null("SpriteRoot")
 	if sprite_root:
@@ -234,6 +259,61 @@ func _test_player_block() -> Variant:
 
 	if not player.has_method("get_block_state"):
 		return "缺少 get_block_state 方法"
+
+	return true
+
+func _test_player_combo_queue() -> Variant:
+	"""测试连招预输入系统"""
+	var player = _create_player()
+
+	if not player:
+		return "无法创建玩家实例"
+
+	# 检查预输入相关参数
+	if player.ATTACK_MOVE_SPEED <= 0:
+		return "攻击移动速度应大于 0"
+
+	if player.COMBO_INPUT_START <= 0:
+		return "预输入窗口开始时间应大于 0"
+
+	if player.COMBO_INPUT_END <= 0:
+		return "预输入窗口结束时间应大于 0"
+
+	# 检查预输入窗口足够大（至少 0.1s）
+	var attack_duration = player.ATTACK_DURATION
+	var input_window = attack_duration - player.COMBO_INPUT_START - player.COMBO_INPUT_END
+	if input_window < 0.1:
+		return "预输入窗口太小（%s），应至少 0.1s" % input_window
+
+	# 检查初始状态
+	if player.queued_attack != "":
+		return "初始预输入队列应为空"
+
+	# 测试轻攻击启动
+	player._start_light_attack()
+	if player.attack_combo != 1:
+		return "第一次轻攻击后 combo 应为 1"
+
+	if player.last_attack_type != player.AttackType.LIGHT:
+		return "轻攻击后类型应为 LIGHT"
+
+	# 模拟预输入
+	player.queued_attack = "light"
+
+	# 模拟攻击结束并执行预输入
+	player.attack_timer = 0
+	player._process_attack(0.016)
+
+	if player.attack_combo != 2:
+		return "预输入执行后 combo 应为 2，实际为 %d" % player.attack_combo
+
+	# 测试重攻击预输入
+	player.queued_attack = "heavy"
+	player.attack_timer = 0
+	player._process_attack(0.016)
+
+	if player.last_attack_type != player.AttackType.HEAVY:
+		return "重攻击预输入后类型应为 HEAVY"
 
 	return true
 

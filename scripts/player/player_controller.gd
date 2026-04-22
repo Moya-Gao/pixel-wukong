@@ -31,6 +31,18 @@ const ATTACK_DURATION = 0.25
 const COMBO_WINDOW = 0.3
 const HEAVY_ATTACK_DURATION = 0.4
 
+# 攻击系统扩展
+const ATTACK_MOVE_SPEED = 80.0  # 攻击时移动速度
+const COMBO_INPUT_START = 0.05  # 攻击开始多久后可以预输入（更早开始）
+const COMBO_INPUT_END = 0.05  # 攻击结束前多久停止预输入（更晚结束）
+
+# 预输入队列
+var queued_attack: String = ""  # "" | "light" | "heavy"
+
+# 连招类型
+enum AttackType { LIGHT, HEAVY }
+var last_attack_type: AttackType = AttackType.LIGHT
+
 # 闪避系统
 var is_dodging = false
 var dodge_timer = 0.0
@@ -135,19 +147,49 @@ func _process_attack(delta):
 	"""处理攻击状态"""
 	attack_timer -= delta
 
-	# 攻击期间可以输入下一击或格挡
-	if can_combo and Input.is_action_just_pressed("attack_light"):
-		_queue_next_attack()
+	# 攻击期间可以缓慢移动
+	var direction = Vector2.ZERO
+	if Input.is_action_pressed("move_right"):
+		direction.x += 1
+		facing_right = true
+	if Input.is_action_pressed("move_left"):
+		direction.x -= 1
+		facing_right = false
+	if Input.is_action_pressed("move_down"):
+		direction.y += 1
+	if Input.is_action_pressed("move_up"):
+		direction.y -= 1
+
+	velocity = direction.normalized() * ATTACK_MOVE_SPEED
+
+	# 计算是否处于可输入窗口（扩大窗口让连招更容易）
+	var attack_duration = HEAVY_ATTACK_DURATION if last_attack_type == AttackType.HEAVY else ATTACK_DURATION
+	var elapsed_time = attack_duration - attack_timer
+	var in_input_window = elapsed_time >= COMBO_INPUT_START and attack_timer > COMBO_INPUT_END
+
+	# 处理预输入
+	if in_input_window:
+		if Input.is_action_just_pressed("attack_light"):
+			queued_attack = "light"
+		elif Input.is_action_just_pressed("attack_heavy"):
+			queued_attack = "heavy"
 
 	# 攻击期间可以取消为格挡
 	if Input.is_action_pressed("block"):
+		queued_attack = ""
 		_end_attack()
 		_start_block()
 		return
 
 	# 攻击结束
 	if attack_timer <= 0:
-		_end_attack()
+		# 检查是否有排队的攻击
+		if queued_attack != "":
+			var next_attack = queued_attack
+			queued_attack = ""
+			_execute_queued_attack(next_attack)
+		else:
+			_end_attack()
 
 func _process_dodge(delta):
 	"""处理闪避状态"""
@@ -270,39 +312,69 @@ func _set_hurtbox_active(active: bool):
 				child.disabled = not active
 
 func _start_light_attack():
-	"""开始轻攻击"""
-	if attack_combo == 0:
-		attack_combo = 1
-	else:
-		attack_combo = min(attack_combo + 1, 3)
-
+	"""开始轻攻击（从非攻击状态）"""
+	attack_combo = 1
+	last_attack_type = AttackType.LIGHT
 	is_attacking = true
 	attack_timer = ATTACK_DURATION
 	can_combo = false
-	velocity = Vector2.ZERO
+	queued_attack = ""
+
+	# 不再设置 velocity = Vector2.ZERO，让 _process_attack 处理移动
+
+	_activate_hitbox()
+
+func _continue_light_attack():
+	"""继续轻攻击连招"""
+	if attack_combo < 3:
+		attack_combo += 1
+
+	last_attack_type = AttackType.LIGHT
+	is_attacking = true
+	attack_timer = ATTACK_DURATION
+	can_combo = false
+	queued_attack = ""
 
 	_activate_hitbox()
 
 func _start_heavy_attack():
-	"""开始重攻击"""
+	"""开始重攻击（从非攻击状态）"""
+	attack_combo = 0  # 重攻击使用单独的动画
+	last_attack_type = AttackType.HEAVY
 	is_attacking = true
-	attack_combo = 0
 	attack_timer = HEAVY_ATTACK_DURATION
 	can_combo = false
-	velocity = Vector2.ZERO
+	queued_attack = ""
 
 	_activate_hitbox()
 
+func _continue_heavy_attack():
+	"""重攻击接在连招后"""
+	last_attack_type = AttackType.HEAVY
+	is_attacking = true
+	attack_timer = HEAVY_ATTACK_DURATION
+	can_combo = false
+	queued_attack = ""
+
+	_activate_hitbox()
+
+func _execute_queued_attack(attack_type: String):
+	"""执行排队的攻击"""
+	if attack_type == "light":
+		_continue_light_attack()
+	elif attack_type == "heavy":
+		_continue_heavy_attack()
+
 func _queue_next_attack():
-	"""预输入下一击"""
-	if attack_combo < 3:
-		combo_window_timer = COMBO_WINDOW
+	"""预输入下一击 - 保持向后兼容"""
+	queued_attack = "light"
 
 func _end_attack():
 	"""结束攻击"""
 	is_attacking = false
 	attack_timer = 0
 	can_combo = false
+	queued_attack = ""
 
 	if combo_window_timer <= 0:
 		attack_combo = 0
@@ -367,7 +439,7 @@ func _update_animation():
 	elif is_blocking:
 		new_anim = "block"
 	elif is_attacking:
-		if attack_combo == 0:
+		if last_attack_type == AttackType.HEAVY:
 			new_anim = "attack_heavy"
 		else:
 			new_anim = "attack_light_%d" % attack_combo
@@ -385,10 +457,7 @@ func _update_animation():
 		current_anim = new_anim
 		animated_sprite.play(new_anim)
 
-		# 攻击动画播放到一半时允许输入下一击
-		if new_anim.begins_with("attack"):
-			await get_tree().create_timer(ATTACK_DURATION * 0.5).timeout
-			can_combo = true
+	# 移除 await 逻辑，can_combo 现在由 _process_attack 控制
 
 # ========== 公共接口（供其他系统调用） ==========
 

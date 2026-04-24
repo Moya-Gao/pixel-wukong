@@ -1,0 +1,66 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://cgrunt_spr001"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/idle_1.png" id="idle_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/idle_2.png" id="idle_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/run_1.png" id="run_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/run_2.png" id="run_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/run_3.png" id="run_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/run_4.png" id="run_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/attack.png" id="attack"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/hurt.png" id="hurt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/grunt/death.png" id="death"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_2")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("run_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("run_4")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("attack")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("hurt")
+}],
+"loop": false,
+"name": &"hurt",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("death")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}]

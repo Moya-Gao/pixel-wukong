@@ -75,7 +75,8 @@ var is_dead = false  # 玩家死亡状态
 const KNOCKBACK_FORCE = 150.0
 
 # 死亡动画
-var death_fade_timer: float = 0.0
+var death_fade_timer: float = -1.0  # -1 表示未开始
+var death_fade_complete: bool = false  # 标记淡出是否完成
 const DEATH_FADE_DURATION: float = 0.5
 
 # 节点引用
@@ -104,6 +105,19 @@ func _ready():
 
 
 func _physics_process(delta):
+	# 死亡状态优先处理（即使同时 is_hurt）
+	if is_dead:
+		if death_fade_timer > 0 and not death_fade_complete:
+			death_fade_timer -= delta
+			if death_fade_timer <= 0:
+				death_fade_timer = 0
+				death_fade_complete = true
+				modulate.a = 0
+				_on_death_complete()
+			else:
+				modulate.a = death_fade_timer / DEATH_FADE_DURATION
+		return  # 死亡渐变期间跳过所有物理处理
+
 	# 更新受伤状态
 	if is_hurt:
 		hurt_timer -= delta
@@ -115,16 +129,6 @@ func _physics_process(delta):
 		_update_visual()
 		_update_animation()
 		return
-
-	# 更新死亡渐变（从DEATH_FADE_DURATION渐变到0，alpha从1.0渐变到0.0）
-	if is_dead:
-		if death_fade_timer > 0:
-			death_fade_timer -= delta
-			var alpha = death_fade_timer / DEATH_FADE_DURATION
-			modulate.a = alpha
-			if death_fade_timer <= 0:
-				_on_death_complete()
-		return  # 死亡渐变期间跳过正常物理处理
 
 	# 更新冷却和计时器
 	if dodge_cooldown_timer > 0:
@@ -570,6 +574,8 @@ func get_current_attack_damage() -> int:
 func _die() -> void:
 	"""玩家死亡"""
 	is_dead = true
+	is_hurt = false  # 清除受伤状态，确保死亡逻辑能执行
+	hurt_timer = 0
 	print("💀 玩家死亡!")
 
 	# 取消所有状态
@@ -587,12 +593,15 @@ func _die() -> void:
 	# 播放死亡动画（如果有）
 	if animated_sprite and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation("death"):
 		animated_sprite.play("death")
-		await get_tree().create_timer(0.3).timeout
-	else:
-		await get_tree().create_timer(0.3).timeout
 
-	# 开始淡出
+	# 使用 call_deferred 延迟设置 fade 参数
+	# 这样可以确保在同一帧内不会立即开始 fade
+	call_deferred("_start_death_fade")
+
+func _start_death_fade() -> void:
+	"""延迟开始死亡淡出"""
 	death_fade_timer = DEATH_FADE_DURATION
+	death_fade_complete = false
 
 func _on_death_complete() -> void:
 	"""死亡动画完成后"""

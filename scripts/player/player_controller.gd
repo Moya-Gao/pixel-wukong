@@ -64,6 +64,20 @@ var is_perfect_block = false
 const BLOCK_SPEED = 80.0  # 格挡时移动速度大幅降低
 const PERFECT_BLOCK_WINDOW = 0.15  # 完美格挡窗口
 
+# 生命值系统
+var max_health = 100
+var current_health = 100
+var is_hurt = false
+var hurt_timer = 0.0
+var knockback_velocity = Vector2.ZERO
+const HURT_DURATION = 0.3
+var is_dead = false  # 玩家死亡状态
+const KNOCKBACK_FORCE = 150.0
+
+# 死亡动画
+var death_fade_timer: float = 0.0
+const DEATH_FADE_DURATION: float = 0.5
+
 # 节点引用
 @onready var sprite_root = $SpriteRoot
 @onready var animated_sprite = $SpriteRoot/AnimatedSprite2D
@@ -74,7 +88,44 @@ const PERFECT_BLOCK_WINDOW = 0.15  # 完美格挡窗口
 @onready var shield_effect = $SpriteRoot/ShieldEffect
 @onready var perfect_block_glow = $SpriteRoot/ShieldEffect/PerfectBlockGlow
 
+
+func _ready():
+	# 添加到 player 组（用于敌人检测区域识别）
+	add_to_group("player")
+
+	# 为 Hitbox 添加组名（用于敌人识别）
+	if hitbox:
+		hitbox.add_to_group("player_hitbox")
+
+	# 为 Hurtbox 添加组名（用于攻击检测）
+	if hurtbox:
+		hurtbox.add_to_group("player_hurtbox")
+		hurtbox.area_entered.connect(_on_hurtbox_area_entered)
+
+
 func _physics_process(delta):
+	# 更新受伤状态
+	if is_hurt:
+		hurt_timer -= delta
+		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 500.0 * delta)
+		velocity = knockback_velocity
+		if hurt_timer <= 0:
+			is_hurt = false
+		move_and_slide()
+		_update_visual()
+		_update_animation()
+		return
+
+	# 更新死亡渐变（从DEATH_FADE_DURATION渐变到0，alpha从1.0渐变到0.0）
+	if is_dead:
+		if death_fade_timer > 0:
+			death_fade_timer -= delta
+			var alpha = death_fade_timer / DEATH_FADE_DURATION
+			modulate.a = alpha
+			if death_fade_timer <= 0:
+				_on_death_complete()
+		return  # 死亡渐变期间跳过正常物理处理
+
 	# 更新冷却和计时器
 	if dodge_cooldown_timer > 0:
 		dodge_cooldown_timer -= delta
@@ -161,6 +212,9 @@ func _process_attack(delta):
 		direction.y -= 1
 
 	velocity = direction.normalized() * ATTACK_MOVE_SPEED
+
+	# 攻击期间持续检测碰撞
+	_check_hitbox_damage()
 
 	# 计算是否处于可输入窗口（扩大窗口让连招更容易）
 	var attack_duration = HEAVY_ATTACK_DURATION if last_attack_type == AttackType.HEAVY else ATTACK_DURATION
@@ -381,10 +435,36 @@ func _end_attack():
 
 	_deactivate_hitbox()
 
+# 攻击伤害标记（防止重复造成伤害）
+var _has_dealt_damage = false
+
 func _activate_hitbox():
 	"""激活攻击碰撞箱"""
+	# 根据朝向更新 Hitbox 位置
 	if hitbox_collision:
+		var offset_x = 8.0 if facing_right else -8.0
+		hitbox_collision.position.x = offset_x
 		hitbox_collision.disabled = false
+	_has_dealt_damage = false  # 重置伤害标记
+
+func _check_hitbox_damage():
+	"""检查 Hitbox 并对敌人造成伤害"""
+	if _has_dealt_damage:
+		return  # 本次攻击已经造成过伤害
+
+	if not hitbox:
+		return
+
+	var overlapping = hitbox.get_overlapping_areas()
+	for area in overlapping:
+		# 排除自己的 Hurtbox
+		if area != hurtbox and area.is_in_group("enemy_hurtbox"):
+			var enemy = area.get_parent()
+			if enemy and enemy.has_method("take_damage"):
+				var knockback_dir = enemy.global_position.direction_to(global_position) * -1
+				enemy.take_damage(get_current_attack_damage(), knockback_dir)
+				_has_dealt_damage = true  # 标记已造成伤害
+				break  # 只对一个敌人造成伤害
 
 func _deactivate_hitbox():
 	"""禁用攻击碰撞箱"""
@@ -433,8 +513,10 @@ func _update_animation():
 
 	var new_anim = ""
 
-	# 状态优先级：闪避 > 格挡 > 攻击 > 跳跃 > 移动 > 站立
-	if is_dodging:
+	# 状态优先级：受伤 > 闪避 > 格挡 > 攻击 > 跳跃 > 移动 > 站立
+	if is_hurt:
+		new_anim = "hurt"
+	elif is_dodging:
 		new_anim = "dodge"
 	elif is_blocking:
 		new_anim = "block"
@@ -478,3 +560,88 @@ func get_block_state() -> Dictionary:
 		"is_perfect": is_perfect_block,
 		"perfect_timer": perfect_block_timer
 	}
+
+func get_current_attack_damage() -> int:
+	"""获取当前攻击伤害"""
+	if last_attack_type == AttackType.HEAVY:
+		return 25  # 重攻击伤害
+	return 10 + (attack_combo - 1) * 5  # 轻攻击连击递增
+
+func _die() -> void:
+	"""玩家死亡"""
+	is_dead = true
+	print("💀 玩家死亡!")
+
+	# 取消所有状态
+	if is_attacking:
+		_end_attack()
+	if is_blocking:
+		_end_block()
+	if is_dodging:
+		_end_dodge()
+
+	# 禁用碰撞（死亡后不再阻挡敌人）
+	collision_layer = 0
+	collision_mask = 0
+
+	# 播放死亡动画（如果有）
+	if animated_sprite and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation("death"):
+		animated_sprite.play("death")
+		await get_tree().create_timer(0.3).timeout
+	else:
+		await get_tree().create_timer(0.3).timeout
+
+	# 开始淡出
+	death_fade_timer = DEATH_FADE_DURATION
+
+func _on_death_complete() -> void:
+	"""死亡动画完成后"""
+	visible = false
+	# 显示 Game Over UI
+	var game_over = preload("res://scenes/ui/game_over.tscn").instantiate()
+	get_tree().root.add_child(game_over)
+
+func take_damage(damage: int, knockback_dir: Vector2) -> void:
+	"""受到伤害"""
+	if is_hurt or is_dead:
+		return
+
+	current_health = maxi(current_health - damage, 0)
+	is_hurt = true
+	hurt_timer = HURT_DURATION
+	knockback_velocity = knockback_dir * KNOCKBACK_FORCE
+
+	# 取消当前状态
+	if is_attacking:
+		_end_attack()
+	if is_blocking:
+		_end_block()
+
+	# 检查是否死亡
+	if current_health <= 0:
+		_die()
+
+func _on_hurtbox_area_entered(area: Area2D) -> void:
+	"""Hurtbox 接收到攻击"""
+	if area.is_in_group("enemy_hitbox"):
+		if not can_take_damage():
+			return
+
+		var enemy = area.get_parent()
+		var damage = 10
+		if "stats" in enemy and enemy.stats:
+			damage = enemy.stats.attack_damage
+
+		var knockback_dir = global_position.direction_to(enemy.global_position) * -1
+
+		# 检查格挡
+		if is_perfect_blocking():
+			# 完美格挡：不受伤，敌人眩晕
+			if enemy.has_method("apply_stun"):
+				enemy.apply_stun(0.5)
+			return
+		elif is_blocking:
+			# 普通格挡：伤害减半
+			damage = damage / 2
+
+		take_damage(damage, knockback_dir)

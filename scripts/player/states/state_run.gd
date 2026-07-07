@@ -5,7 +5,7 @@ extends "res://scripts/player/states/state_base.gd"
 
 
 func process(delta: float) -> void:
-	var direction := player._read_movement_direction()
+	var direction: Vector2 = player._read_movement_direction()
 
 	# 无方向输入 → 回 IDLE
 	if direction.length() < 0.01:

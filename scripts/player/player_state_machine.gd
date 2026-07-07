@@ -88,7 +88,7 @@ func transition_to(target: PlayerState.State, data: Dictionary = {}) -> bool:
 	if not can_transition(target):
 		return false
 
-	var from_state := current_state
+	var from_state: int = current_state
 
 	if state_instance:
 		state_instance.exit()

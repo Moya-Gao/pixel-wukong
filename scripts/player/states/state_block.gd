@@ -20,7 +20,7 @@ func enter(_data: Dictionary = {}) -> void:
 
 func process(delta: float) -> void:
 	# 应用移动（格挡时可缓慢移动）
-	var direction := player._read_movement_direction()
+	var direction: Vector2 = player._read_movement_direction()
 	player.velocity = direction.normalized() * player.BLOCK_SPEED
 
 	# 更新完美格挡窗口

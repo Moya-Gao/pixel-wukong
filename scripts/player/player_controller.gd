@@ -88,12 +88,12 @@ func _ready() -> void:
 		hurtbox.area_entered.connect(_on_hurtbox_area_entered)
 
 	# 动态添加 FSM 和 Visual 节点（不动 player.tscn）
-	fsm = PlayerStateMachine.new()
+	fsm = preload("res://scripts/player/player_state_machine.gd").new()
 	fsm.name = "PlayerStateMachine"
 	add_child(fsm)
 	fsm.setup(self)
 
-	visual = PlayerVisual.new()
+	visual = preload("res://scripts/player/player_visual.gd").new()
 	visual.name = "PlayerVisual"
 	add_child(visual)
 	visual.player = self
@@ -129,6 +129,20 @@ func can_take_damage() -> bool: return not (is_dodging and is_invincible)
 func is_perfect_blocking() -> bool: return is_blocking and is_perfect_block
 func get_block_state() -> Dictionary:
 	return {"is_blocking": is_blocking, "is_perfect": is_perfect_block, "perfect_timer": perfect_block_timer}
+
+# ========== 测试入口（包装 FSM 转换，保持测试兼容）==========
+func _start_dodge(direction: Vector2) -> void:
+	# 确保从 IDLE 开始（避免 DODGE→DODGE 非法转换）
+	if fsm.current_state != PlayerState.State.IDLE:
+		_end_dodge()
+		fsm.transition_to(PlayerState.State.IDLE)
+	fsm.transition_to(PlayerState.State.DODGE, {"direction": direction})
+
+func _start_light_attack() -> void:
+	fsm.transition_to(PlayerState.State.ATTACK_LIGHT)
+
+func _process_attack(delta: float) -> void:
+	fsm.process(delta)
 
 func get_current_attack_damage() -> int:
 	if last_attack_type == AttackType.HEAVY: return 25

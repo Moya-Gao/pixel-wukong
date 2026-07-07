@@ -10,8 +10,8 @@ var player: CharacterBody2D
 
 ## 更新视觉偏移（SprintRoot 位置 + 缩放 + 阴影 alpha）
 func update_visual() -> void:
-	var is_jumping := player.fsm.current_state == PlayerState.State.JUMP_RISE \
-		or player.fsm.current_state == PlayerState.State.JUMP_FALL
+	var state_val: int = player.fsm.current_state
+	var is_jumping: bool = state_val == PlayerState.State.JUMP_RISE or state_val == PlayerState.State.JUMP_FALL
 
 	# 跳跃视觉偏移（伪3D 效果）
 	if is_jumping and player.MAX_JUMP_HEIGHT > 0:
@@ -43,7 +43,7 @@ func update_animation() -> void:
 		return
 
 	var new_anim := ""
-	var state := player.fsm.current_state
+	var state: int = player.fsm.current_state
 
 	# 状态优先级：受伤 > 闪避 > 格挡 > 攻击 > 跳跃 > 移动 > 站立
 	if player.is_hurt:

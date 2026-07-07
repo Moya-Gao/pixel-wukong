@@ -54,7 +54,7 @@ func _print_summary():
 
 func _test_player_init() -> Variant:
 	"""测试玩家初始化"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -69,7 +69,7 @@ func _test_player_init() -> Variant:
 
 func _test_player_animation() -> Variant:
 	"""测试玩家动画状态"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -99,7 +99,7 @@ func _test_player_animation() -> Variant:
 
 func _test_player_movement() -> Variant:
 	"""测试玩家移动参数"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -119,7 +119,7 @@ func _test_player_movement() -> Variant:
 
 func _test_player_attack() -> Variant:
 	"""测试玩家攻击系统"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -155,7 +155,7 @@ func _test_player_attack() -> Variant:
 
 func _test_player_dodge() -> Variant:
 	"""测试玩家闪避系统"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -220,7 +220,7 @@ func _test_player_dodge() -> Variant:
 
 func _test_player_block() -> Variant:
 	"""测试玩家格挡系统"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -264,7 +264,7 @@ func _test_player_block() -> Variant:
 
 func _test_player_combo_queue() -> Variant:
 	"""测试连招预输入系统"""
-	var player = _create_player()
+	var player = await _create_player()
 
 	if not player:
 		return "无法创建玩家实例"
@@ -326,4 +326,5 @@ func _create_player():
 	var player = player_scene.instantiate()
 	# 添加到场景树以初始化 @onready 变量
 	root.add_child(player)
+	await self.process_frame
 	return player

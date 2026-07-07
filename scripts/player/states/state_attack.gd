@@ -7,7 +7,7 @@ extends "res://scripts/player/states/state_base.gd"
 
 func enter(data: Dictionary = {}) -> void:
 	# 根据当前进入的状态决定是轻还是重
-	var is_heavy := fsm.current_state == PlayerState.State.ATTACK_HEAVY
+	var is_heavy: bool = fsm.current_state == PlayerState.State.ATTACK_HEAVY
 
 	if is_heavy:
 		# 重攻击：从非攻击状态进入 OR 连招接重击
@@ -16,16 +16,13 @@ func enter(data: Dictionary = {}) -> void:
 		player.last_attack_type = player.AttackType.HEAVY
 		player.attack_timer = player.HEAVY_ATTACK_DURATION
 	else:
-		# 轻攻击：combo 计数 +1（除非是连招续击）
-		if data.has("combo") and data.combo == 1:
-			player.attack_combo = 1
-		elif player.attack_combo < 3:
+		# 轻攻击：每次进入递增 combo（包括连招续击）
+		if player.attack_combo < 3:
 			player.attack_combo += 1
 		player.last_attack_type = player.AttackType.LIGHT
 		player.attack_timer = player.ATTACK_DURATION
 
 	player.is_attacking = true
-	player.can_combo = false
 	player.queued_attack = ""
 	player._activate_hitbox()
 
@@ -34,7 +31,7 @@ func process(delta: float) -> void:
 	player.attack_timer -= delta
 
 	# 攻击期间可以缓慢移动
-	var direction := player._read_movement_direction()
+	var direction: Vector2 = player._read_movement_direction()
 	if direction.length() > 0.01:
 		if direction.x != 0:
 			player.facing_right = direction.x > 0
@@ -44,9 +41,9 @@ func process(delta: float) -> void:
 	player._check_hitbox_damage()
 
 	# 计算 cancel window 和 input window
-	var attack_duration := player.HEAVY_ATTACK_DURATION if player.last_attack_type == player.AttackType.HEAVY else player.ATTACK_DURATION
-	var elapsed := attack_duration - player.attack_timer
-	var in_input_window := elapsed >= player.COMBO_INPUT_START and player.attack_timer > player.COMBO_INPUT_END
+	var attack_duration: float = player.HEAVY_ATTACK_DURATION if player.last_attack_type == player.AttackType.HEAVY else player.ATTACK_DURATION
+	var elapsed: float = attack_duration - player.attack_timer
+	var in_input_window: bool = elapsed >= player.COMBO_INPUT_START and player.attack_timer > player.COMBO_INPUT_END
 
 	# 连击窗口计时
 	if player.combo_window_timer > 0:
@@ -69,7 +66,7 @@ func process(delta: float) -> void:
 		return
 
 	# 攻击期间可以取消为闪避（轻攻击 cancel window 较宽，重攻击较窄）
-	var can_cancel_to_dodge := false
+	var can_cancel_to_dodge: bool = false
 	if player.last_attack_type == player.AttackType.LIGHT:
 		can_cancel_to_dodge = elapsed >= 0.05 and player.attack_timer > 0.05
 	elif player.last_attack_type == player.AttackType.HEAVY:
@@ -83,7 +80,7 @@ func process(delta: float) -> void:
 	# 攻击结束
 	if player.attack_timer <= 0:
 		if player.queued_attack != "":
-			var next_attack := player.queued_attack
+			var next_attack: String = player.queued_attack
 			player.queued_attack = ""
 			_execute_queued_attack(next_attack)
 		else:
@@ -100,6 +97,7 @@ func handle_input(_event: Dictionary) -> bool:
 
 
 func _execute_queued_attack(attack_type: String) -> void:
+	player.combo_window_timer = player.COMBO_WINDOW
 	if attack_type == "light":
 		fsm.transition_to(PlayerState.State.ATTACK_LIGHT, {"combo": player.attack_combo})
 	elif attack_type == "heavy":

@@ -11,7 +11,7 @@ func enter(_data: Dictionary = {}) -> void:
 
 func process(delta: float) -> void:
 	# 移动方向检测
-	var direction := player._read_movement_direction()
+	var direction: Vector2 = player._read_movement_direction()
 	if direction.length() > 0.01:
 		fsm.transition_to(PlayerState.State.RUN)
 		return

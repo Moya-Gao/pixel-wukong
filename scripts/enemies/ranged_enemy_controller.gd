@@ -56,7 +56,7 @@ func _process_behavior(delta: float) -> void:
 
 
 func _approach_target() -> void:
-	var direction := sign(target.global_position.x - global_position.x)
+	var direction: float = sign(target.global_position.x - global_position.x)
 	if direction != 0:
 		facing_right = direction > 0
 	velocity.x = direction * stats.move_speed
@@ -64,7 +64,7 @@ func _approach_target() -> void:
 
 
 func _retreat_from_target() -> void:
-	var direction := sign(global_position.x - target.global_position.x)
+	var direction: float = sign(global_position.x - target.global_position.x)
 	if direction != 0:
 		facing_right = direction > 0
 	velocity.x = direction * stats.move_speed * 0.8  # 后退比前进稍慢

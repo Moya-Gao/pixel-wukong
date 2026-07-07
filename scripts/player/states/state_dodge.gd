@@ -10,7 +10,7 @@ func enter(data: Dictionary = {}) -> void:
 	player.dodge_cooldown_timer = player.DODGE_COOLDOWN
 
 	# 确定闪避方向（传入的方向优先，否则按朝向）
-	var direction := data.get("direction", Vector2.ZERO)
+	var direction: Vector2 = data.get("direction", Vector2.ZERO)
 	if direction.length() > 0.1:
 		player.dodge_direction = direction.normalized()
 	else:

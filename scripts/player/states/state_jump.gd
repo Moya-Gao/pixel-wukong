@@ -9,7 +9,7 @@ extends "res://scripts/player/states/state_base.gd"
 func enter(data: Dictionary = {}) -> void:
 	# 只在从 IDLE/RUN 进入时才初始化跳跃参数
 	# RISE→FALL 时 enter 也会被调用（同一 instance），但此时 jump_height 已被 process 推到 >0，跳过初始化
-	var prev := data.get("prev_state", PlayerState.State.IDLE)
+	var prev: int = data.get("prev_state", PlayerState.State.IDLE)
 	if prev == PlayerState.State.IDLE or prev == PlayerState.State.RUN:
 		player.jump_height = 0.0
 		player.jump_velocity = sqrt(2.0 * player.JUMP_GRAVITY * player.MAX_JUMP_HEIGHT)
@@ -32,7 +32,7 @@ func process(delta: float) -> void:
 		return
 
 	# 空中水平方向微调
-	var direction := player._read_movement_direction()
+	var direction: Vector2 = player._read_movement_direction()
 	if direction.length() > 0.01:
 		player.velocity = direction.normalized() * player.SPEED * 0.5
 	else:

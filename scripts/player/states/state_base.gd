@@ -5,8 +5,8 @@
 class_name StateBase
 extends RefCounted
 
-var player: CharacterBody2D  # 引用 PlayerController（它是 CharacterBody2D）
-var fsm: PlayerStateMachine
+var player: CharacterBody2D
+var fsm  # PlayerStateMachine — untyped to break circular dep
 
 
 func enter(_data: Dictionary = {}) -> void:

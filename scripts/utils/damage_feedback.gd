@@ -22,6 +22,7 @@ const DAMAGE_NUMBER_SCENE := preload("res://scenes/utils/damage_number.tscn")
 # ========== 缓存引用 ==========
 var _camera_shake: Camera2D = null
 var _player: Node = null
+var _tracked_projectiles: Array = []
 
 
 func _ready() -> void:
@@ -148,3 +149,21 @@ func _spawn_damage_number(pos: Vector2, damage: int, _is_enemy_hit: bool) -> voi
 	get_tree().current_scene.add_child(node)
 	node.global_position = pos
 	node.setup(damage, _is_enemy_hit)
+
+
+# ========== 子弹命中监听 ==========
+# 子弹在 RangedEnemy._shoot() 里运行时创建，_ready 时还不存在
+# 用 _process 持续扫描 projectile group，动态 connect 新子弹的 hit_player signal
+func _process(_delta: float) -> void:
+	for proj in get_tree().get_nodes_in_group("projectile"):
+		if proj in _tracked_projectiles:
+			continue
+		if proj.has_signal("hit_player"):
+			proj.hit_player.connect(_on_projectile_hit_player)
+			_tracked_projectiles.append(proj)
+
+
+func _on_projectile_hit_player(damage: int) -> void:
+	_trigger_shake(damage)
+	if _player:
+		_spawn_damage_number(_player.global_position + Vector2(0, -16), damage, false)

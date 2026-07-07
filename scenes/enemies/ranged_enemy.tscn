@@ -1,0 +1,79 @@
+[gd_scene load_steps=8 format=3 uid="uid://dranged01"]
+
+[ext_resource type="Script" path="res://scripts/enemies/ranged_enemy_controller.gd" id="1_ranged"]
+[ext_resource type="Script" path="res://scripts/enemies/enemy_stats.gd" id="2_stats"]
+[ext_resource type="SpriteFrames" path="res://resources/grunt_sprites.tres" id="3_sprites"]
+[ext_resource type="PackedScene" uid="uid://dprojectile01" path="res://scenes/enemies/projectile.tscn" id="4_proj"]
+
+[sub_resource type="Resource" id="Resource_ranged_stats"]
+script = ExtResource("2_stats")
+max_health = 35
+current_health = 35
+move_speed = 60.0
+chase_speed = 100.0
+attack_damage = 8
+attack_range = 200.0
+attack_duration = 0.4
+attack_cooldown = 2.0
+hurt_duration = 0.3
+knockback_force = 100.0
+knockback_friction = 500.0
+detection_range = 250.0
+patrol_range = 30.0
+patrol_wait_time = 2.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hurtbox"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_detection"]
+radius = 250.0
+
+[node name="RangedEnemy" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("1_ranged")
+stats = SubResource("Resource_ranged_stats")
+preferred_distance = 150.0
+retreat_distance = 80.0
+max_chase_distance = 350.0
+shoot_range = 200.0
+shoot_cooldown = 2.0
+bullet_speed = 250.0
+bullet_damage = 8
+bullet_lifetime = 3.0
+bullet_scene = ExtResource("4_proj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="SpriteRoot" type="Node2D" parent="."]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="SpriteRoot"]
+position = Vector2(0, -12)
+sprite_frames = ExtResource("3_sprites")
+animation = &"idle"
+modulate = Color(0.5, 1.0, 0.5, 1)
+
+[node name="Shadow" type="ColorRect" parent="."]
+offset_left = -10.0
+offset_top = -2.0
+offset_right = 10.0
+offset_bottom = 2.0
+color = Color(0, 0, 0, 0.3)
+
+[node name="Hurtbox" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
+shape = SubResource("CircleShape2D_hurtbox")
+
+[node name="DetectionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DetectionArea"]
+shape = SubResource("CircleShape2D_detection")

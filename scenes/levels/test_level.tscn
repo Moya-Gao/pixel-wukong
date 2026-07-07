@@ -1,8 +1,9 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="PackedScene" uid="uid://c8hbxrxvxwx2j" path="res://scenes/player.tscn" id="1_player"]
 [ext_resource type="Script" path="res://scripts/utils/damage_feedback.gd" id="2_fb"]
 [ext_resource type="PackedScene" uid="uid://dgrunt001" path="res://scenes/enemies/grunt.tscn" id="3_grunt"]
+[ext_resource type="PackedScene" uid="uid://dranged01" path="res://scenes/enemies/ranged_enemy.tscn" id="4_ranged"]
 
 [node name="TestLevel" type="Node2D"]
 
@@ -125,6 +126,9 @@ position = Vector2(140, 135)
 
 [node name="Grunt1" parent="." instance=ExtResource("3_grunt")]
 position = Vector2(340, 135)
+
+[node name="RangedEnemy1" parent="." instance=ExtResource("4_ranged")]
+position = Vector2(420, 135)
 
 [node name="DamageFeedback" type="Node" parent="."]
 script = ExtResource("2_fb")

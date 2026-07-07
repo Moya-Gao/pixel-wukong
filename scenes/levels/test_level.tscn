@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="PackedScene" uid="uid://c8hbxrxvxwx2j" path="res://scenes/player.tscn" id="1_player"]
+[ext_resource type="Script" path="res://scripts/utils/damage_feedback.gd" id="2_fb"]
+[ext_resource type="PackedScene" uid="uid://dgrunt001" path="res://scenes/enemies/grunt.tscn" id="3_grunt"]
 
 [node name="TestLevel" type="Node2D"]
 
@@ -118,43 +120,14 @@ offset_right = 448.0
 offset_bottom = 64.0
 color = Color(0.2, 0.2, 0.25, 1)
 
-[node name="Tile16" type="ColorRect" parent="Grid"]
-offset_left = 0.0
-offset_top = 64.0
-offset_right = 32.0
-offset_bottom = 96.0
-color = Color(0.2, 0.2, 0.25, 1)
-
-[node name="Tile17" type="ColorRect" parent="Grid"]
-offset_left = 64.0
-offset_top = 64.0
-offset_right = 96.0
-offset_bottom = 96.0
-color = Color(0.2, 0.2, 0.25, 1)
-
-[node name="Tile18" type="ColorRect" parent="Grid"]
-offset_left = 128.0
-offset_top = 64.0
-offset_right = 160.0
-offset_bottom = 96.0
-color = Color(0.2, 0.2, 0.25, 1)
-
-[node name="Tile19" type="ColorRect" parent="Grid"]
-offset_left = 192.0
-offset_top = 64.0
-offset_right = 224.0
-offset_bottom = 96.0
-color = Color(0.2, 0.2, 0.25, 1)
-
-[node name="Tile20" type="ColorRect" parent="Grid"]
-offset_left = 256.0
-offset_top = 64.0
-offset_right = 288.0
-offset_bottom = 96.0
-color = Color(0.2, 0.2, 0.25, 1)
-
 [node name="Player" parent="." instance=ExtResource("1_player")]
-position = Vector2(240, 135)
+position = Vector2(140, 135)
+
+[node name="Grunt1" parent="." instance=ExtResource("3_grunt")]
+position = Vector2(340, 135)
+
+[node name="DamageFeedback" type="Node" parent="."]
+script = ExtResource("2_fb")
 
 [node name="Marker" type="ColorRect" parent="."]
 offset_left = 236.0

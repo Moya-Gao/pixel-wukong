@@ -58,12 +58,24 @@ func _ready() -> void:
 		detection_area.body_entered.connect(_on_detection_area_body_entered)
 		detection_area.body_exited.connect(_on_detection_area_body_exited)
 
+	# 缓存原始 modulate 用于 telegraph 恢复
+	_original_modulate = modulate
+
+
+# 攻击前摇闪烁：attack 前 0.12s 变红，给玩家反应窗口
+var _telegraph_active: bool = false
+var _telegraph_timer: float = 0.0
+var _original_modulate: Color = Color.WHITE
+const TELEGRAPH_DURATION: float = 0.12
+const TELEGRAPH_COLOR: Color = Color(1.0, 0.3, 0.3, 1.0)  # 红色
+
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 
 	_update_timers(delta)
+	_update_telegraph(delta)
 
 	if is_hurt:
 		_process_hurt(delta)
@@ -177,6 +189,8 @@ func _check_hitbox_overlaps() -> void:
 			if target and target.has_method("take_damage"):
 				var knockback_dir = target.global_position.direction_to(global_position) * -1
 				target.take_damage(stats.attack_damage, knockback_dir)
+				# Hit stop: 敌人命中玩家也顿帧
+				HitStop.trigger_by_damage(get_tree(), stats.attack_damage)
 				_has_dealt_damage = true
 				break  # 只对一个目标造成伤害
 
@@ -243,3 +257,21 @@ func _on_detection_area_body_entered(body: Node2D) -> void:
 func _on_detection_area_body_exited(body: Node2D) -> void:
 	if body == target:
 		target = null
+
+
+# ========== 攻击前摇（Telegraph）==========
+## 攻击前 0.12s 闪烁红色，给玩家反应窗口
+## 子类在 _start_attack 前调用
+func _show_attack_telegraph() -> void:
+	_telegraph_active = true
+	_telegraph_timer = TELEGRAPH_DURATION
+	modulate = TELEGRAPH_COLOR
+
+
+func _update_telegraph(delta: float) -> void:
+	if not _telegraph_active:
+		return
+	_telegraph_timer -= delta
+	if _telegraph_timer <= 0:
+		_telegraph_active = false
+		modulate = _original_modulate

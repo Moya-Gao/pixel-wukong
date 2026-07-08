@@ -140,6 +140,8 @@ func _start_attack() -> void:
 		_start_rush_attack()
 		return
 
+	# 攻击前摇：红色闪烁给玩家反应窗口
+	_show_attack_telegraph()
 	is_attacking = true
 	attack_timer = stats.attack_duration
 	velocity = Vector2.ZERO
@@ -165,6 +167,8 @@ func _end_attack() -> void:
 # ========== 突进攻击 ==========
 ## 蓄力→高速冲撞→冷却。攻击范围比普通攻击大 1.5 倍
 func _start_rush_attack() -> void:
+	# 突进前摇更长（蓄力阶段本身就是 telegraph）
+	_show_attack_telegraph()
 	is_rushing = true
 	rush_charge_timer = RUSH_CHARGE_TIME
 	rush_has_dealt_damage = false

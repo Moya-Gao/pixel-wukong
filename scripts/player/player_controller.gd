@@ -19,6 +19,45 @@ extends CharacterBody2D
 var fsm: PlayerStateMachine
 var visual: PlayerVisual
 
+# ========== 连击 HUD ==========
+var _combo_label: Label = null
+var _combo_fade_timer: float = 0.0
+const COMBO_DISPLAY_DURATION: float = 2.0  # 连击显示持续秒数
+
+
+func _setup_combo_hud() -> void:
+	var canvas := CanvasLayer.new()
+	canvas.name = "ComboHUD"
+	canvas.layer = 10  # 渲染在最上层
+	add_child(canvas)
+
+	_combo_label = Label.new()
+	_combo_label.name = "ComboLabel"
+	_combo_label.add_theme_font_size_override("font_size", 28)
+	_combo_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))  # 金色
+	_combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_combo_label.anchors_preset = Control.PRESET_CENTER_TOP
+	_combo_label.position = Vector2(0, -80)
+	canvas.add_child(_combo_label)
+
+
+func _update_combo_hud(delta: float) -> void:
+	if not _combo_label:
+		return
+	if attack_combo >= 2:
+		_combo_label.text = str(attack_combo) + " HIT"
+		_combo_fade_timer = COMBO_DISPLAY_DURATION
+		_combo_label.modulate.a = 1.0
+		# 字体大小随连击数递增
+		var size := 28 + (attack_combo - 2) * 4
+		_combo_label.add_theme_font_size_override("font_size", size)
+	elif _combo_fade_timer > 0:
+		_combo_fade_timer -= delta
+		if _combo_fade_timer <= 0:
+			_combo_label.modulate.a = 0.0
+		else:
+			_combo_label.modulate.a = _combo_fade_timer / COMBO_DISPLAY_DURATION
+
 # ========== 常量（state 需要直接访问）==========
 const SPEED = 200.0
 const MAX_JUMP_HEIGHT = 40.0
@@ -98,6 +137,8 @@ func _ready() -> void:
 	add_child(visual)
 	visual.player = self
 
+	_setup_combo_hud()
+
 
 func _physics_process(delta: float) -> void:
 	if dodge_cooldown_timer > 0:
@@ -106,6 +147,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	visual.update_visual()
 	visual.update_animation()
+	_update_combo_hud(delta)
 
 
 # ========== 输入检测（被 state 调用）==========
@@ -170,7 +212,10 @@ func _check_hitbox_damage() -> void:
 		if area != hurtbox and area.is_in_group("enemy_hurtbox"):
 			var enemy = area.get_parent()
 			if enemy and enemy.has_method("take_damage"):
-				enemy.take_damage(get_current_attack_damage(), enemy.global_position.direction_to(global_position) * -1)
+				var dmg := get_current_attack_damage()
+				enemy.take_damage(dmg, enemy.global_position.direction_to(global_position) * -1)
+				# Hit stop: 命中顿帧
+				HitStop.trigger_by_damage(get_tree(), dmg)
 			_has_dealt_damage = true
 			break
 

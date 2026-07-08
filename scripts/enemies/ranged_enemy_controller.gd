@@ -1,5 +1,5 @@
 ## 远程敌人（法师型）
-## 行为：发现玩家 → 保持理想距离 → 射击子弹
+## 行为：发现玩家 → 保持理想距离 → 预判射击（预测玩家移动轨迹）
 ## 不近战，所以没有 Hitbox，只有 Hurtbox + DetectionArea
 
 extends "res://scripts/enemies/enemy_base.gd"
@@ -18,6 +18,7 @@ class_name RangedEnemyController
 
 # ========== 状态 ==========
 var shoot_timer: float = 0.0
+var _last_target_pos: Vector2 = Vector2.ZERO  # 用于计算玩家速度
 
 
 func _ready() -> void:
@@ -29,6 +30,10 @@ func _process_behavior(delta: float) -> void:
 	if not target:
 		velocity = Vector2.ZERO
 		return
+
+	# 计算玩家移动方向（用于预判射击）
+	var target_vel := target.global_position - _last_target_pos
+	_last_target_pos = target.global_position
 
 	shoot_timer -= delta
 	var dist_to_target: float = global_position.distance_to(target.global_position)
@@ -82,7 +87,13 @@ func _shoot() -> void:
 	var spawn_offset := Vector2(10.0 if facing_right else -10.0, -12.0)
 	bullet.global_position = global_position + spawn_offset
 
-	var direction := (target.global_position - global_position).normalized()
+	# 预判射击：预测玩家位置 = 当前位置 + 速度 * 飞行时间
+	var target_vel := target.global_position - _last_target_pos if _last_target_pos != Vector2.ZERO else Vector2.ZERO
+	var dist := global_position.distance_to(target.global_position)
+	var travel_time := dist / bullet_speed
+	var predicted_pos := target.global_position + target_vel * travel_time * 0.8  # 0.8: 不完全预测，留反应空间
+
+	var direction := (predicted_pos - bullet.global_position).normalized()
 	bullet.setup(direction, bullet_speed, bullet_damage, bullet_lifetime, facing_right)
 
 

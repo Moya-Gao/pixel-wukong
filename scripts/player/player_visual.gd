@@ -66,4 +66,7 @@ func update_animation() -> void:
 
 	if new_anim != player.current_anim:
 		player.current_anim = new_anim
-		player.animated_sprite.play(new_anim)
+		var sprite_frames = player.animated_sprite.sprite_frames
+		if sprite_frames and sprite_frames.has_animation(new_anim):
+			player.animated_sprite.play(new_anim)
+		# else: 动画资源缺失，静默跳过（不崩）

@@ -64,6 +64,10 @@ func _ready() -> void:
 
 # 攻击前摇闪烁：attack 前 0.12s 变红，给玩家反应窗口
 var _telegraph_active: bool = false
+
+## 公共 getter：测试可读 telegraph 状态，不绕过 AI 路径
+func is_telegraph_active() -> bool:
+	return _telegraph_active
 var _telegraph_timer: float = 0.0
 var _original_modulate: Color = Color.WHITE
 const TELEGRAPH_DURATION: float = 0.12

@@ -29,7 +29,7 @@ var attack_cooldown_timer: float = 0.0
 # ========== 节点引用 ==========
 @onready var sprite_root: Node2D = $SpriteRoot
 @onready var animated_sprite: AnimatedSprite2D = $SpriteRoot/AnimatedSprite2D
-@onready var hitbox: Area2D = $Hitbox
+@onready var hitbox: Area2D = get_node_or_null("Hitbox")
 @onready var hurtbox: Area2D = $Hurtbox
 @onready var detection_area: Area2D = $DetectionArea
 

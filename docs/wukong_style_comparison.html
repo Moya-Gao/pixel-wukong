@@ -3,43 +3,57 @@
 <style>
 body { font-family: system-ui; background: #1a1a2e; color: #eee; max-width: 900px; margin: 0 auto; padding: 20px; }
 h1 { color: #e94560; }
-h2 { color: #f39c12; margin-top: 30px; }
-.compare { display: flex; gap: 40px; justify-content: center; margin: 30px 0; }
+.compare { display: flex; gap: 30px; justify-content: center; margin: 30px 0; flex-wrap: wrap; }
 .version { text-align: center; background: #16213e; border-radius: 12px; padding: 20px; width: 280px; }
 .version img { display: block; margin: 0 auto; background: #0f3460; border-radius: 8px; image-rendering: pixelated; }
 .version h3 { color: #4ecca3; margin: 12px 0 8px; }
 .version p { font-size: 12px; color: #aaa; line-height: 1.6; text-align: left; }
-.tag { display: inline-block; background: #e94560; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin: 4px 2px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin: 3px; }
+.tag.red { background: #e94560; color: #fff; }
 .tag.green { background: #4ecca3; color: #1a1a2e; }
-.note { background: #0f3460; border-left: 4px solid #f39c12; padding: 12px 16px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+.tag.blue { background: #3498db; color: #fff; }
+.note { background: #0f3460; border-left: 4px solid #f39c12; padding: 12px 16px; margin: 20px 0; border-radius: 0 8px 8px 0; line-height: 1.6; }
+ul { padding-left: 20px; }
+li { margin: 6px 0; color: #ccc; }
 </style></head><body>
 <h1>🐵 悟空风格方向对比</h1>
-<p>烁烁做了两个版本，请铲屎官选方向：</p>
+<p style="color:#aaa;">烁烁做了两个修正版（都是<strong>正面朝向</strong>），co-creator 选方向：</p>
+
 <div class="compare">
   <div class="version">
-    <img src="wukong_A_16x24_refined_preview.png" width="128" height="192">
-    <h3>版本 A：原版优化</h3>
-    <div><span class="tag">16×24</span><span class="tag green">正面</span><span class="tag">7色</span></div>
-    <p>✅ 跟现有游戏 100% 风格一致<br>
-    ✅ 无需改代码（碰撞框、尺寸都不用动）<br>
-    ✅ 极简像素剪影，经典街机感<br>
-    ⚠️ 细节空间有限（脸、武器难表现）</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAADACAYAAADMZmunAAACxUlEQVR4nO3doY4TQQCA4e0FCeoESOwlVPIINSgUhnfAkdSAAHMJvAYGhcKc4AGQJbngcOXEJQg0JbzAndg0s+H/Pttsd5L9M0mns7urabD1en2Ywna73Wrk+U9GnpzxBBAngDgBxAkgTgBxAog7+m/Q+u/8pa8TmAHiBBAngDgBxAkgTgBxAogTQJwA4gQQJ4A4AcQJIE4AcQKIG7on/Z+fn87T+wUePN26L4BxBBAngDgBxAkgTgBxAogbvg5wuJzS6wCrs7HXwAwQJ4A4AcQJIE4AcQKIE0DcndEDuPp+fuPnm1cfbvz84u3zaaTN7PFtp5HMAHECiBNAnADiBBAngDgBxA1fB7jNfr+flmy/8PHdxgwQJ4A4AcQJIE4AcQKIE0Dc8PsCPB9g674AxhFAnADiBBAngDgBxAkgbvH7Aeb6/ebjrOPvvn42/c/MAHECiBNAnADiBBAngDgBxA3fD/Buc5reD/Dy4tp+AMYRQJwA4gQQJ4A4AcQJIE4AcQKIE0CcAOIEECeAOAHECSBOAHECiBNAnADiBBAngDgBxAkgTgBxAogTQJwA4gQQJ4A4AcQJIE4AcQKIE0CcAOIEECeAOAHECSBu+HMCD5dT+jmBq7Ox18AMECeAOAHECSBOAHECiBNA3PD3Br5/cTq1XQ89uxkgTgBxAogTQJwA4gQQJ4C44esAX37dO+r3f/76Y9b/7U8ePzzyfgXrAAwkgDgBxAkgTgBxAogTQJwA4gQQJ4A4AcQJIE4AcQKIE0CcAOIEECeAOAHECSBOAHECiBNAnADiBBAngDgBxAkgTgBxAogTQJwA4gQQJ4A4AcQJIE4AcQKIE0CcAOIEECeAOAHECSBOAHECiBNAnADiBBAngDgBxAkgTgBxAogTQNzw9wZ+u/oz6/hH90/S45tr2aPj6AQQJ4A4AcQJIE4AcQKI+wsmHjtVmDdwdQAAAABJRU5ErkJggg==" width="128" height="192">
+    <h3>版本 A：16×24 优化</h3>
+    <div><span class="tag red">16×24</span><span class="tag green">正面</span><span class="tag blue">7色</span></div>
+    <p>
+    ✅ 跟现有游戏 100% 兼容<br>
+    ✅ 零代码改动<br>
+    ✅ 经典像素剪影风格<br>
+    ⚠️ 细节空间有限
+    </p>
   </div>
   <div class="version">
-    <img src="wukong_B_32x32_front_preview.png" width="128" height="128">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAACf0lEQVR4nO3doUpDURyA8TMxKggWo2AyzCD4AIYVk8kiPoFgE1Y0aBFm9QnEYjJZDD6AYPAKYhBs0zAQNKssKrIxvHr+937fr8mmd4yP/zmcba6Rgms2mx+pwoqiaKTAxnI/AOVlAHAGAJd9far6Gl/1PYITAM4A4AwAzgDgDADOAOAMAC77OUDZ5wQ3p8WXnxfWmlnvX/hagCIzADgDgAu9PvU9nR1U+rWCmdV26OfYCQBnAHAGABd6fer7uEuV3gM05mM/x04AOAOAMwA4A4AzADgDgDMAuPEU3PP9wcDbWzsnA2+/2F8v9fG0Rr5eO0XmBIAzADgDgAu/Bxim2+3W+np/zQkAZwBwBgAX+rXqPt8T+LecAHAGAGcAcJU/BxjV297pSPef2F1LdeYEgDMAOAOAw+0B6r6mj8oJAGcAcAYAF+6cutOaLvXsf2Nz+1e/f3zUSWXavuiFes6dAHAGAGcAcLU/B/i+hg/bExyXvOZH5wSAMwA4A4Cr/R6AvsYP4wSAMwA4A4AzADgDgDMAOAOAMwA4A4AzADgDgDMAOAOAMwA4A4AzADgDgDMAOAOAMwA4A4AzADgDgAv1WfUc3xX8sL448Pa5k+taf5ewEwDOAOAMAC7UepRjD/Df3AMoFAOAMwC4cP8f4HBrOtVbL0XiBIAzADgDgDMAOAOAMwA4A4ALdw7w3eXLZKl/b3nqNdT1cnMCwBkAnAHAGQCcAcAZAJwBwIV6f9pPVpZmS32P4PnVYyPS9XJzAsAZAJwBwBkAnAHAGQCcAcAZAJwBwBkAnAHAGQCcAcAZAJwBwIX/XMDt83utr5ebEwDOAOAMAM4A4AwAzgDgDADuEz/vXwuPF2gRAAAAAElFTkSuQmCC" width="128" height="128">
     <h3>版本 B：32×32 正面</h3>
-    <div><span class="tag">32×32</span><span class="tag green">正面</span><span class="tag">鲜艳</span></div>
-    <p>✅ 参考 itch.io 预览图风格<br>
-    ✅ 更多细节空间（金冠尖角、V领、腰带）<br>
-    ✅ 角色更醒目，动作更有表现力<br>
-    ⚠️ 需要改代码（碰撞框、速度、相机 zoom）</p>
+    <div><span class="tag red">32×32</span><span class="tag green">正面</span><span class="tag blue">鲜艳</span></div>
+    <p>
+    ✅ 更多细节空间<br>
+    ✅ 参考 itch.io 预览图<br>
+    ✅ 角色更醒目<br>
+    ⚠️ 需改碰撞框/相机
+    </p>
   </div>
 </div>
+
 <div class="note">
-  <strong>关键区别：</strong>两个版本都是<b>正面朝向</b>（跟原版一致），区别只在尺寸和细节量。之前烁烁做的 32×32 侧面版被 pass 是因为<b>朝向错了</b>，不是尺寸问题。
+<strong>🔑 关键修正：</strong>之前被 pass 的版本是<strong>侧面朝向</strong>，跟原版正面不一致。现在两个新版都是<strong>正面</strong>，风格对齐了。
 </div>
-<h2>怎么选？</h2>
-<p><b>选 A</b> = 快速迭代，不改代码，先让游戏跑起来<br>
-<b>选 B</b> = 品质升级，需要金哥/宪宪帮忙改一圈代码适配</p>
-<p><b>也可以先 A 后 B</b>：用 A 把游戏跑通验证玩法，确定要继续做了再升级到 B。Placeholder → Polish 的路线。</p>
+
+<h2 style="color:#f39c12;">怎么选？</h2>
+<ul>
+<li><strong>选 A</strong> → 立刻替换现有 placeholder，不改任何代码，游戏马上变好看</li>
+<li><strong>选 B</strong> → 品质升级路线，但需要改碰撞框、速度参数、相机适配</li>
+<li><strong>先 A 后 B</strong> → 用 A 跑通玩法验证，确定继续做了再升 B</li>
+</ul>
+
+<p style="margin-top:30px;color:#888;font-size:12px;">Commit: 45809a5 | 烁烁 @ kimi-k2.6</p>
 </body></html>

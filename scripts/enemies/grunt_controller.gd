@@ -45,8 +45,8 @@ func _process_behavior(delta: float) -> void:
 		_process_rush(delta)
 		return
 
-	# 丢失目标 → 回到巡逻（不再永远站桩）
-	if is_chasing and not target:
+	# 丢失目标 → 回到巡逻（覆盖追丢了 + 受伤时丢目标两种路径）
+	if not target and not is_patrolling:
 		is_chasing = false
 		is_patrolling = true
 		patrol_start_pos = global_position

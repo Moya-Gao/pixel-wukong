@@ -55,12 +55,14 @@ Co-Authored-By: 金哥 <jinge@cat-cafe.local>
 - 每个非琐碎变更：先 spec 后 plan 后实现（小活免 spec，架构性变更必须 spec）
 - Commit message 用 Conventional Commits（feat / fix / chore / refactor / docs / test），body 写 Why
 
-## 当前状态（2026-07-07 接手时盘点）
+## 当前状态（2026-07-11 Phase 2 收尾时更新）
 
-- **Sprint 001**（项目启动）已超出原定范围（实做了视角重构 + 战斗 + 死亡系统）
-- **Phase 2（战斗系统）**进行中：核心已勾选，连招 / 攻击取消 / 敌人 AI / 伤害判定未勾选
+- **Phase 1（基础框架）**✅ 已完成
+- **Phase 2（战斗系统）**✅ 已完成 — 核心战斗全通，36/36 自动化测试守卫
+- **Sprint 001** ✅ 已完成（超出原定范围，实际覆盖到 Phase 2 全部核心）
 - **main 分支无保护规则**：可直推，但工程上仍走 feature 分支 + PR 更稳
 - **gh CLI** 已登录 Moya-Gao，token scopes 含 `repo`（含 push 权限）
+- **本地领先 remote 1 个 commit**（网络超时，待恢复后 push）
 
 ## 验证清单（2026-07-07）
 
@@ -71,8 +73,10 @@ Co-Authored-By: 金哥 <jinge@cat-cafe.local>
 - [x] local git config 设置（author.name 被平台 env 覆盖）
 - [x] **真实 commit + push**：方法 A 方案 commit 推到 origin/main 验证通过
 
-## 下一步（待 operator 拍板）
+## 下一步（Phase 3 — Boss 系统）
 
-- Sprint 001 收尾 vs Sprint 002 开启
-- Phase 2 缺口优先级（连招 / 攻击取消 / 敌人 AI / 伤害判定）
-- 拉 @opus 评估路线架构性 + 同步 SPRINT 002 计划
+- 设计 Boss 行为树框架（可复用架构）
+- 实现第一章 Boss 黑熊精（多阶段 + 攻击模式）
+- Boss 血条 UI
+- 战斗变身系统框架（Phase 4 的前置依赖）
+- 建议：开启 Sprint 002，先出 Boss 行为树 spec → plan → 实现

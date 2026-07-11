@@ -139,3 +139,43 @@ offset_top = 131.0
 offset_right = 244.0
 offset_bottom = 139.0
 color = Color(1, 0, 0, 0.5)
+
+; --- 地面 ---
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = 0.0
+offset_top = 240.0
+offset_right = 480.0
+offset_bottom = 270.0
+color = Color(0.25, 0.18, 0.12, 1)
+
+; --- 高台 ---
+[node name="PlatformLeft" type="ColorRect" parent="."]
+offset_left = 20.0
+offset_top = 175.0
+offset_right = 140.0
+offset_bottom = 183.0
+color = Color(0.3, 0.22, 0.15, 1)
+
+[node name="PlatformRight" type="ColorRect" parent="."]
+offset_left = 340.0
+offset_top = 175.0
+offset_right = 460.0
+offset_bottom = 183.0
+color = Color(0.3, 0.22, 0.15, 1)
+
+[node name="PlatformCenter" type="ColorRect" parent="."]
+offset_left = 200.0
+offset_top = 140.0
+offset_right = 280.0
+offset_bottom = 148.0
+color = Color(0.35, 0.25, 0.15, 1)
+
+; --- 敌人：2 Grunt + 1 Ranged 新增 ---
+[node name="Grunt2" parent="." instance=ExtResource("3_grunt")]
+position = Vector2(80, 220)
+
+[node name="Grunt3" parent="." instance=ExtResource("3_grunt")]
+position = Vector2(400, 220)
+
+[node name="RangedEnemy2" parent="." instance=ExtResource("4_ranged")]
+position = Vector2(400, 163)

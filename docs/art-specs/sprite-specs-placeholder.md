@@ -77,6 +77,15 @@
 - 播放时长：`HURT_DURATION = 0.3s`（约 3-4 帧的停留时间）
 - 之后自动切入 idle
 
+### ⚠️ Godot 资源注册（关键！）
+**仅把 png 放入 `assets/sprites/player/` 文件夹 ≠ 动画可用**。必须在 `resources/player_sprites.tres` 的 `SpriteFrames` 资源中显式注册：
+
+1. 在 `[ext_resource]` 区添加 png 引用：`[ext_resource type="Texture2D" path="res://assets/sprites/player/hurt.png" id="hurt"]`
+2. 在 `animations` 数组中添加条目，指定动画名（`"name": &"hurt"`）和引用的帧
+3. 代码中通过 `animated_sprite.play("hurt")` 才能正确播放
+
+**遗漏此步的后果**：png 文件存在，但 `has_animation("hurt")` 返回 false，代码守卫静默跳过 → 玩家受击时无动画。
+
 ### 占位版局限
 当前占位图用简单色块表达，**缺少**：
 - 金箍棒细节纹理

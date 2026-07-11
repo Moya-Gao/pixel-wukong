@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/player/attack_heavy.png" id="attack_heavy"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/dodge.png" id="dodge"]
 [ext_resource type="Texture2D" path="res://assets/sprites/player/block.png" id="block"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player/hurt.png" id="hurt"]
 
 [resource]
 animations = [{
@@ -108,4 +109,12 @@ animations = [{
 "loop": false,
 "name": &"block",
 "speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("hurt")
+}],
+"loop": false,
+"name": &"hurt",
+"speed": 10.0
 }]

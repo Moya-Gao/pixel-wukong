@@ -1,0 +1,117 @@
+[gd_scene load_steps=7 format=3 uid="uid://dbossarena01"]
+
+[ext_resource type="Script" path="res://scripts/levels/boss_arena.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://c8hbxrxvxwx2j" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://dblackbear001" path="res://scenes/enemies/black_bear_boss.tscn" id="3_boss"]
+[ext_resource type="Script" path="res://scripts/utils/damage_feedback.gd" id="4_fb"]
+[ext_resource type="Script" path="res://scripts/ui/boss_hp_bar.gd" id="5_hpbar"]
+
+[node name="BossArena" type="Node2D"]
+script = ExtResource("1_script")
+
+; --- 背景 ---
+[node name="Background" type="ColorRect" parent="."]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.08, 0.06, 0.1, 1)
+
+; --- 装饰格子 ---
+[node name="GridDecor" type="Node2D" parent="."]
+
+[node name="Tile1" type="ColorRect" parent="GridDecor"]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 32.0
+offset_bottom = 32.0
+color = Color(0.12, 0.1, 0.14, 1)
+
+[node name="Tile2" type="ColorRect" parent="GridDecor"]
+offset_left = 64.0
+offset_top = 0.0
+offset_right = 96.0
+offset_bottom = 32.0
+color = Color(0.12, 0.1, 0.14, 1)
+
+[node name="Tile3" type="ColorRect" parent="GridDecor"]
+offset_left = 128.0
+offset_top = 0.0
+offset_right = 160.0
+offset_bottom = 32.0
+color = Color(0.12, 0.1, 0.14, 1)
+
+[node name="Tile4" type="ColorRect" parent="GridDecor"]
+offset_left = 480.0
+offset_top = 0.0
+offset_right = 512.0
+offset_bottom = 32.0
+color = Color(0.12, 0.1, 0.14, 1)
+
+[node name="Tile5" type="ColorRect" parent="GridDecor"]
+offset_left = 544.0
+offset_top = 0.0
+offset_right = 576.0
+offset_bottom = 32.0
+color = Color(0.12, 0.1, 0.14, 1)
+
+[node name="Tile6" type="ColorRect" parent="GridDecor"]
+offset_left = 608.0
+offset_top = 0.0
+offset_right = 640.0
+offset_bottom = 32.0
+color = Color(0.12, 0.1, 0.14, 1)
+
+; --- 地面 ---
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = 0.0
+offset_top = 320.0
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.2, 0.12, 0.08, 1)
+
+; --- 平台 ---
+[node name="PlatformLeft" type="ColorRect" parent="."]
+offset_left = 40.0
+offset_top = 240.0
+offset_right = 160.0
+offset_bottom = 250.0
+color = Color(0.25, 0.16, 0.1, 1)
+
+[node name="PlatformRight" type="ColorRect" parent="."]
+offset_left = 480.0
+offset_top = 240.0
+offset_right = 600.0
+offset_bottom = 250.0
+color = Color(0.25, 0.16, 0.1, 1)
+
+[node name="PlatformCenter" type="ColorRect" parent="."]
+offset_left = 270.0
+offset_top = 190.0
+offset_right = 370.0
+offset_bottom = 200.0
+color = Color(0.3, 0.2, 0.12, 1)
+
+; --- 篝火装饰 ---
+[node name="Bonfire" type="ColorRect" parent="."]
+offset_left = 310.0
+offset_top = 175.0
+offset_right = 330.0
+offset_bottom = 190.0
+color = Color(1.0, 0.5, 0.1, 0.8)
+
+; --- 玩家 ---
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(120, 280)
+
+; --- Boss ---
+[node name="BlackBearBoss" parent="." instance=ExtResource("3_boss")]
+position = Vector2(520, 280)
+
+; --- 伤害反馈 ---
+[node name="DamageFeedback" type="Node" parent="."]
+script = ExtResource("4_fb")
+
+; --- Boss 血条 ---
+[node name="BossHPBar" type="Node" parent="."]
+script = ExtResource("5_hpbar")

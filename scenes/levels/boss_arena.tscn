@@ -113,5 +113,5 @@ position = Vector2(520, 280)
 script = ExtResource("4_fb")
 
 ; --- Boss 血条 ---
-[node name="BossHPBar" type="Node" parent="."]
+[node name="BossHPBar" type="CanvasLayer" parent="."]
 script = ExtResource("5_hpbar")

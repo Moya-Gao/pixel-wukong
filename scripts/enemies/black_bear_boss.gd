@@ -74,19 +74,21 @@ func _build_phase_sequence(phase: int) -> BTSequence:
 		2: cooldowns = COOLDOWNS_P3
 
 	# --- Berserk (仅 P3) ---
-	if cooldowns[4] < 999.0:
-		attack_sel.add_child(_build_attack_seq(ATK_BERSERK, BERSERK_RANGE, cooldowns[4], BERSERK_DURATION, func(): _do_berserk()))
+	# 索引对应 COOLDOWNS_Px 注释顺序 [swipe, slam, charge, berserk]
+	if cooldowns[3] < 999.0:
+		attack_sel.add_child(_build_attack_seq(ATK_BERSERK, BERSERK_RANGE, cooldowns[3], BERSERK_DURATION, func(): _do_berserk()))
 
 	# --- Ground Slam ---
-	attack_sel.add_child(_build_attack_seq(ATK_SLAM, SLAM_RANGE, cooldowns[3], SLAM_DURATION, func(): _do_slam()))
+	attack_sel.add_child(_build_attack_seq(ATK_SLAM, SLAM_RANGE, cooldowns[1], SLAM_DURATION, func(): _do_slam()))
 
 	# --- Charge ---
 	if cooldowns[2] < 999.0:
 		attack_sel.add_child(_build_attack_seq(ATK_CHARGE, CHARGE_RANGE, cooldowns[2], CHARGE_DURATION, func(): _do_charge()))
 
 	# --- Swipe Combo (P2+) / Basic Swipe (P1) ---
+	# Swipe Combo 共用 swipe 冷却（[0]）；保留独立常量需扩展为 5 元素数组
 	if phase >= 1:
-		attack_sel.add_child(_build_attack_seq(ATK_SWIPE_COMBO, SWIPE_RANGE, cooldowns[1], SWIPE_COMBO_DURATION, func(): _do_swipe_combo()))
+		attack_sel.add_child(_build_attack_seq(ATK_SWIPE_COMBO, SWIPE_RANGE, cooldowns[0], SWIPE_COMBO_DURATION, func(): _do_swipe_combo()))
 	else:
 		attack_sel.add_child(_build_attack_seq(ATK_SWIPE, SWIPE_RANGE, cooldowns[0] if cooldowns.size() > 0 else 2.0, SWIPE_DURATION, func(): _do_swipe()))
 
@@ -216,8 +218,8 @@ func _chase_player(_delta: float, ctx: Dictionary) -> void:
 		velocity = Vector2.ZERO
 		return
 
-	var dir_x := sign(t.global_position.x - global_position.x)
-	var dir_y := sign(t.global_position.y - global_position.y)
+	var dir_x: float = sign(t.global_position.x - global_position.x)
+	var dir_y: float = sign(t.global_position.y - global_position.y)
 	if dir_x != 0:
 		facing_right = dir_x > 0
 

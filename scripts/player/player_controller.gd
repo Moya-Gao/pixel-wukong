@@ -202,7 +202,7 @@ func take_damage(damage: int, knockback_dir: Vector2) -> void:
 # ========== Hitbox 管理（被 state_attack 调用）==========
 func _activate_hitbox() -> void:
 	if hitbox_collision:
-		hitbox_collision.position.x = 8.0 if facing_right else -8.0
+		hitbox_collision.position.x = 16.0 if facing_right else -16.0
 		hitbox_collision.disabled = false
 	_has_dealt_damage = false
 

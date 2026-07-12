@@ -23,7 +23,7 @@ shape = SubResource("CircleShape2D_body")
 position = Vector2(0, 0)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="SpriteRoot"]
-position = Vector2(0, -12)
+position = Vector2(0, -16)
 sprite_frames = ExtResource("3_sprites")
 animation = &"idle"
 autoplay = ""

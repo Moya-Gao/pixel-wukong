@@ -24,6 +24,19 @@ var _phase_transition_duration: float = 1.5
 ## 由 BossIntroController 控制，跟 _phase_transitioning 同类早退模式
 var is_intro_active: bool = false
 
+# ========== 当前攻击记录 ==========
+## 在 _execute_attack 起手时记录，_on_hit_landed 命中玩家时使用并清空
+## 解决 "boss_attack_landed 信号挥空也触发" 语义谎报 — 信号只在真命中时 emit
+var _current_attack_name: String = ""
+
+# ========== 重击判定（共享真相源，跟 attack_screen_fx 同步）==========
+const HEAVY_ATTACK_KEYWORDS := ["slam", "charge", "berserk", "combo", "heavy"]
+static func is_heavy_attack(attack_name: String) -> bool:
+	for kw in HEAVY_ATTACK_KEYWORDS:
+		if attack_name.contains(kw):
+			return true
+	return false
+
 # ========== 类型化 stats ==========
 var boss_stats: BossStats:
 	get: return stats as BossStats
@@ -229,7 +242,30 @@ func _execute_attack(attack_name: String, duration_override: float = 0.0) -> voi
 	velocity = Vector2.ZERO
 	_activate_hitbox()
 	start_cooldown(attack_name)
-	boss_attack_landed.emit(attack_name)  # 重击屏幕效果 / 未来扩展监听
+	# 记录当前攻击名，_on_hit_landed 命中时才会 emit 信号 + 触发 heavy 特效
+	_current_attack_name = attack_name
+
+
+## Boss override 命中玩家回调：信号只在真命中时 emit（不挥空触发）
+## Boss 重击时触发 boss_heavy 顿帧 + 屏幕微震
+func _on_hit_landed(_target: Node) -> void:
+	if _current_attack_name != "":
+		boss_attack_landed.emit(_current_attack_name)
+		if is_heavy_attack(_current_attack_name):
+			HitStop.trigger_by_attack_type(get_tree(), "boss_heavy")
+			_trigger_boss_micro_shake()
+		else:
+			HitStop.trigger_by_attack_type(get_tree(), "light")
+		_current_attack_name = ""  # 清空，避免重复触发
+
+
+## Boss 重击屏幕微震（短暂，强度比 damage_feedback 的低 — 重击是 skill 压制感）
+func _trigger_boss_micro_shake() -> void:
+	var cameras := get_tree().get_nodes_in_group("camera_shake")
+	for cam in cameras:
+		if cam.has_method("shake"):
+			cam.shake(2.5, 0.10)
+			return
 
 
 ## 处理攻击中状态（在 _process_behavior 中调用，当 is_attacking=true 时）

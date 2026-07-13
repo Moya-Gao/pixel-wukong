@@ -193,10 +193,16 @@ func _check_hitbox_overlaps() -> void:
 			if target and target.has_method("take_damage"):
 				var knockback_dir = target.global_position.direction_to(global_position) * -1
 				target.take_damage(stats.attack_damage, knockback_dir)
-				# Hit stop: 敌人命中玩家也顿帧
-				HitStop.trigger_by_damage(get_tree(), stats.attack_damage)
+				_on_hit_landed(target)
 				_has_dealt_damage = true
 				break  # 只对一个目标造成伤害
+
+
+## 命中玩家后的回调（子类 override 自定义顿帧/特效）
+## 默认行为：按伤害值触发 Hit Stop（Phase 2 行为，普通敌人继承）
+## Boss override 此函数可改为按 attack_type 分级 + 触发专属特效
+func _on_hit_landed(_target: Node) -> void:
+	HitStop.trigger_by_damage(get_tree(), stats.attack_damage)
 
 
 ## 禁用 Hitbox

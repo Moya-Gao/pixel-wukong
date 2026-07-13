@@ -220,8 +220,8 @@ func _check_hitbox_damage() -> void:
 			if enemy and enemy.has_method("take_damage"):
 				var dmg := get_current_attack_damage()
 				enemy.take_damage(dmg, enemy.global_position.direction_to(global_position) * -1)
-				# Hit stop: 命中顿帧
-				HitStop.trigger_by_damage(get_tree(), dmg)
+				# Hit stop: 按当前攻击类型分级（轻 0.05s / 重 0.10s）— 单一真相源
+				HitStop.trigger_by_attack_type(get_tree(), get_current_attack_type())
 			_has_dealt_damage = true
 			break
 

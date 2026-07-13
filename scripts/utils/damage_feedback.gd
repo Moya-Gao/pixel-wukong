@@ -119,9 +119,7 @@ func _on_player_hitbox_hit(area: Area2D) -> void:
 	_spawn_damage_number(enemy.global_position + Vector2(0, -16), damage, true)
 	_trigger_shake(damage)
 
-	# Hit Stop 按玩家当前攻击类型分级（轻/重）
-	var attack_type := _get_player_attack_type()
-	HitStop.trigger_by_attack_type(get_tree(), attack_type)
+	# Hit Stop 由 player_controller._check_hitbox_damage 单一触发（不在此处重复）
 
 
 # ========== 玩家被敌人命中 ==========
@@ -171,12 +169,6 @@ func _is_boss(enemy: Node) -> bool:
 	return enemy is BossBase
 
 
-func _get_player_attack_type() -> String:
-	if _player and _player.has_method("get_current_attack_type"):
-		return _player.get_current_attack_type()
-	return "light"
-
-
 func _flash_boss_poise(enemy: Node) -> void:
 	# Boss 短促偏蓝闪白（"打不动"质感，比普通闪白短 + 颜色不同）
 	if not enemy or not enemy.has_node("SpriteRoot"):
@@ -210,8 +202,9 @@ func _show_poise_ripple(enemy: Node) -> void:
 	sprite_root.add_child(ripple)
 
 	# tween: scale 扩大 + 宽度衰减 + alpha 淡出 + 完成后 free
+	# bind_node(ripple) 让 tween 跟 ripple 一起死 — Boss queue_free 时不引用悬空对象
 	var scale_factor := POISE_RIPPLE_RADIUS_END / POISE_RIPPLE_RADIUS_START
-	var tween := create_tween()
+	var tween := create_tween().bind_node(ripple)
 	tween.set_parallel(true)
 	tween.tween_property(ripple, "scale", Vector2(scale_factor, scale_factor), POISE_RIPPLE_DURATION)
 	tween.tween_property(ripple, "width", POISE_RIPPLE_WIDTH_END, POISE_RIPPLE_DURATION)

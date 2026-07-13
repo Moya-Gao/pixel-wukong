@@ -18,6 +18,11 @@ var _phase_transitioning: bool = false
 var _phase_transition_timer: float = 0.0
 var _phase_transition_duration: float = 1.5
 
+# ========== 仪式性无敌状态 ==========
+## Boss 登场演出中：BT 不 tick + 无敌
+## 由 BossIntroController 控制，跟 _phase_transitioning 同类早退模式
+var is_intro_active: bool = false
+
 # ========== 类型化 stats ==========
 var boss_stats: BossStats:
 	get: return stats as BossStats
@@ -56,6 +61,10 @@ func _ready() -> void:
 # ========== 主循环 ==========
 func _process_behavior(delta: float) -> void:
 	if not bt_root:
+		return
+
+	# 登场演出中：BT 不 tick（视觉照常播，因为 _physics_process 还在跑）
+	if is_intro_active:
 		return
 
 	# 阶段切换中：无敌 + 视觉效果
@@ -172,6 +181,10 @@ func start_custom_cooldown(ability_name: String, duration: float) -> void:
 
 # ========== 重写伤害处理 ==========
 func take_damage(damage: int, knockback_dir: Vector2 = Vector2.ZERO) -> void:
+	# 登场演出中无敌（跟 _phase_transitioning 同类早退，避免 process_mode 大锤）
+	if is_intro_active:
+		return
+
 	# 阶段切换中无敌
 	if _phase_transitioning:
 		return

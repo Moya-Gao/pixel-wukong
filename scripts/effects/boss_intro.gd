@@ -33,7 +33,6 @@ const FONT_SIZE_BIG := 48
 const PHASE_LABEL_RATIO := 0.4   # 屏幕高度比例
 
 var _is_playing: bool = false
-var _boss_saved_process_mode: int = -1  # intro 期间冻结 Boss 子树，结束后恢复
 
 
 func _ready() -> void:
@@ -120,16 +119,16 @@ func _play_phase_effect(new_phase: int, phase_name: String) -> void:
 
 
 ## 播放登场序列（开场）
-## 流程：HP bar 隐藏 → Boss 冻结 → 黑屏 → Boss 名大字 → 淡出 → HP bar 从左滑入 → Boss 解冻
+## 流程：HP bar 隐藏 → Boss 仪式性无敌 → 黑屏 → Boss 名大字 → 淡出 → HP bar 从左滑入 → 解除无敌
 func play_intro() -> void:
 	if _is_playing or not _boss:
 		return
 	_is_playing = true
 	intro_started.emit()
 
-	# 登场期间冻结 Boss 子树（BT 不 tick、不接受输入），演出结束恢复
-	_boss_saved_process_mode = _boss.process_mode
-	_boss.process_mode = Node.PROCESS_MODE_DISABLED
+	# Boss 仪式性无敌：跟 _phase_transitioning 同类的行为层早退，
+	# BT 不 tick + take_damage 早退，process_mode 一刀切会漏掉无敌
+	_boss.is_intro_active = true
 
 	# 登场前隐藏 HP bar
 	if _hp_bar:
@@ -167,10 +166,9 @@ func _on_intro_slide_in() -> void:
 		_hp_bar.slide_in()
 
 
-## Intro 结束：恢复 Boss 处理
+## Intro 结束：解除 Boss 仪式性无敌
 func _finish_intro() -> void:
-	if _boss and _boss_saved_process_mode != -1:
-		_boss.process_mode = _boss_saved_process_mode
-		_boss_saved_process_mode = -1
+	if _boss:
+		_boss.is_intro_active = false
 	_is_playing = false
 	intro_finished.emit()

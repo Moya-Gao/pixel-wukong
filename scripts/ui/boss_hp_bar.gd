@@ -185,3 +185,24 @@ func _hide() -> void:
 		var t := create_tween()
 		t.tween_property(_panel, "modulate:a", 0.0, 0.5)
 		t.tween_callback(func(): _panel.visible = false)
+
+
+# ========== Intro 序列对外接口 ==========
+## 由 BossIntroController 调用：登场前隐藏 HP bar（瞬隐，不淡出）
+func hide_for_intro() -> void:
+	if _panel:
+		_panel.visible = false
+
+
+## 由 BossIntroController 调用：HP bar 从屏外滑入到自己的目标 X
+## 自管 panel 位置 + tween，外部不需要知道内部布局
+func slide_in(from_offset_x: float = -300.0, duration: float = 0.5) -> void:
+	if not _panel:
+		return
+	var target_x := _panel.position.x  # 当前 panel 位置即目标
+	_panel.visible = true
+	_panel.modulate.a = 1.0
+	_panel.position.x = from_offset_x
+	var t := create_tween()
+	t.tween_property(_panel, "position:x", target_x, duration)\
+		.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)

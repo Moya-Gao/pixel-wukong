@@ -23,7 +23,6 @@ var _canvas: CanvasLayer
 var _overlay: ColorRect        # 全屏暗化层
 var _phase_label: Label        # 阶段名大字
 var _phase_accent: ColorRect   # 阶段颜色横条
-var _hp_bar_target_x: float    # HP bar 滑入目标 X（默认 0）
 
 # ========== 常量 ==========
 const LAYER := 20              # 高于 BossHPBar (layer=10)
@@ -34,6 +33,7 @@ const FONT_SIZE_BIG := 48
 const PHASE_LABEL_RATIO := 0.4   # 屏幕高度比例
 
 var _is_playing: bool = false
+var _boss_saved_process_mode: int = -1  # intro 期间冻结 Boss 子树，结束后恢复
 
 
 func _ready() -> void:
@@ -68,11 +68,6 @@ func _ready() -> void:
 func bind(boss: BossBase, hp_bar: BossHPBar) -> void:
 	_boss = boss
 	_hp_bar = hp_bar
-	if _hp_bar:
-		# 记录 HP bar 当前位置，slide-in 时回到这里
-		_hp_bar_target_x = 0.0
-		if _hp_bar._panel:
-			_hp_bar_target_x = _hp_bar._panel.position.x
 	_boss.boss_phase_changed.connect(_on_phase_changed)
 
 
@@ -125,20 +120,24 @@ func _play_phase_effect(new_phase: int, phase_name: String) -> void:
 
 
 ## 播放登场序列（开场）
-## 流程：HP bar 隐藏 → 黑屏 → Boss 名大字 → 淡出 → HP bar 从左滑入
+## 流程：HP bar 隐藏 → Boss 冻结 → 黑屏 → Boss 名大字 → 淡出 → HP bar 从左滑入 → Boss 解冻
 func play_intro() -> void:
 	if _is_playing or not _boss:
 		return
 	_is_playing = true
 	intro_started.emit()
 
-	# 登场期间隐藏 HP bar，等结束再 slide-in
-	if _hp_bar and _hp_bar._panel:
-		_hp_bar._panel.visible = false
+	# 登场期间冻结 Boss 子树（BT 不 tick、不接受输入），演出结束恢复
+	_boss_saved_process_mode = _boss.process_mode
+	_boss.process_mode = Node.PROCESS_MODE_DISABLED
+
+	# 登场前隐藏 HP bar
+	if _hp_bar:
+		_hp_bar.hide_for_intro()
 
 	var boss_name := _boss.boss_stats.boss_name
 	var phase_color := Color.WHITE
-	if _hp_bar:
+	if _hp_bar and not _hp_bar.HP_COLORS.is_empty():
 		phase_color = _hp_bar.HP_COLORS[0]
 
 	_phase_label.text = boss_name
@@ -156,24 +155,22 @@ func play_intro() -> void:
 	t.tween_property(_overlay, "color:a", 0.0, 0.4)
 	t.parallel().tween_property(_phase_label, "modulate:a", 0.0, 0.4)
 
-	# 第二段：HP bar slide-in
-	t.tween_callback(_slide_in_hp_bar)
+	# 第二段：HP bar slide-in（HP bar 自己知道目标 X）
+	t.tween_callback(_on_intro_slide_in)
 
 	t.tween_callback(_finish_intro)
 
 
-## HP bar slide-in（屏幕外左侧滑入到目标位置）
-func _slide_in_hp_bar() -> void:
-	if _hp_bar and _hp_bar._panel:
-		_hp_bar._panel.visible = true
-		_hp_bar._panel.modulate.a = 1.0
-		_hp_bar._panel.position.x = -300.0  # 屏幕外左侧起手
-		var t2 := create_tween()
-		t2.tween_property(_hp_bar._panel, "position:x", _hp_bar_target_x, 0.5)\
-			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+## HP bar slide-in 由 BossHPBar 自管
+func _on_intro_slide_in() -> void:
+	if _hp_bar:
+		_hp_bar.slide_in()
 
 
-## Intro 结束
+## Intro 结束：恢复 Boss 处理
 func _finish_intro() -> void:
+	if _boss and _boss_saved_process_mode != -1:
+		_boss.process_mode = _boss_saved_process_mode
+		_boss_saved_process_mode = -1
 	_is_playing = false
 	intro_finished.emit()

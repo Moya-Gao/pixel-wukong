@@ -38,6 +38,20 @@ static func trigger_by_damage(tree: SceneTree, damage: int) -> void:
 		hit_stop.trigger(duration)
 
 
+## 便捷方法：按攻击类型决定顿帧强度（覆盖 trigger_by_damage 的纯伤害分级）
+## 攻击类型: "light" → 0.05s, "heavy" → 0.10s, "boss_heavy" → 0.15s
+static func trigger_by_attack_type(tree: SceneTree, attack_type: String) -> void:
+	var hit_stop := _find_or_create(tree)
+	if hit_stop:
+		var duration: float
+		match attack_type:
+			"boss_heavy": duration = 0.15
+			"heavy": duration = 0.10
+			"light": duration = 0.05
+			_: duration = 0.03
+		hit_stop.trigger(duration)
+
+
 static func _find_or_create(tree: SceneTree) -> HitStop:
 	# 尝试在场景根节点下找已有的 HitStop
 	for child in tree.current_scene.get_children():

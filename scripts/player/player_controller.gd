@@ -190,6 +190,12 @@ func get_current_attack_damage() -> int:
 	if last_attack_type == AttackType.HEAVY: return 25
 	return 10 + (attack_combo - 1) * 5
 
+
+## 暴露当前攻击类型给外部系统（damage_feedback 用来分级 Hit Stop）
+## 返回: "light" | "heavy"（未攻击时 fallback "light"）
+func get_current_attack_type() -> String:
+	return "heavy" if last_attack_type == AttackType.HEAVY else "light"
+
 func take_damage(damage: int, knockback_dir: Vector2) -> void:
 	if is_hurt or is_dead: return
 	current_health = maxi(current_health - damage, 0)

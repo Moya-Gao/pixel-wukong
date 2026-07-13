@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/utils/damage_feedback.gd" id="4_fb"]
 [ext_resource type="Script" path="res://scripts/ui/boss_hp_bar.gd" id="5_hpbar"]
 [ext_resource type="Script" path="res://scripts/effects/boss_intro.gd" id="6_intro"]
+[ext_resource type="Script" path="res://scripts/effects/attack_screen_fx.gd" id="7_asfx"]
 
 [node name="BossArena" type="Node2D"]
 script = ExtResource("1_script")
@@ -119,3 +120,6 @@ script = ExtResource("5_hpbar")
 
 [node name="BossIntroController" type="Node" parent="."]
 script = ExtResource("6_intro")
+
+[node name="AttackScreenFX" type="Node" parent="."]
+script = ExtResource("7_asfx")

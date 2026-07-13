@@ -7,6 +7,7 @@ extends EnemyBase
 # ========== 信号 ==========
 signal boss_phase_changed(new_phase: int, phase_name: String)
 signal boss_health_changed(current: int, max_health: int)
+signal boss_attack_landed(attack_name: String)  # 重击屏幕效果监听（attack_screen_fx.gd）
 
 # ========== BT ==========
 var bt_root: BTNode
@@ -34,6 +35,7 @@ var _cooldowns: Dictionary = {}
 
 func _ready() -> void:
 	super._ready()
+	add_to_group("boss")  # attack_screen_fx 等系统扫描此 group 连接信号
 	# 确保 stats 是 BossStats 类型
 	if not stats is BossStats:
 		push_error("BossBase requires BossStats resource!")
@@ -227,6 +229,7 @@ func _execute_attack(attack_name: String, duration_override: float = 0.0) -> voi
 	velocity = Vector2.ZERO
 	_activate_hitbox()
 	start_cooldown(attack_name)
+	boss_attack_landed.emit(attack_name)  # 重击屏幕效果 / 未来扩展监听
 
 
 ## 处理攻击中状态（在 _process_behavior 中调用，当 is_attacking=true 时）

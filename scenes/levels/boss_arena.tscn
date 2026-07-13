@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dblackbear001" path="res://scenes/enemies/black_bear_boss.tscn" id="3_boss"]
 [ext_resource type="Script" path="res://scripts/utils/damage_feedback.gd" id="4_fb"]
 [ext_resource type="Script" path="res://scripts/ui/boss_hp_bar.gd" id="5_hpbar"]
+[ext_resource type="Script" path="res://scripts/effects/boss_intro.gd" id="6_intro"]
 
 [node name="BossArena" type="Node2D"]
 script = ExtResource("1_script")
@@ -115,3 +116,6 @@ script = ExtResource("4_fb")
 ; --- Boss 血条 ---
 [node name="BossHPBar" type="CanvasLayer" parent="."]
 script = ExtResource("5_hpbar")
+
+[node name="BossIntroController" type="Node" parent="."]
+script = ExtResource("6_intro")

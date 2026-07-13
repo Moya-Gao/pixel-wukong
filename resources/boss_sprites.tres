@@ -1,0 +1,60 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://dblackbearsprites001"]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/boss_idle_1.png" id="boss_idle_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/boss_idle_2.png" id="boss_idle_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/boss_attack_1.png" id="boss_attack_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/boss_attack_2.png" id="boss_attack_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/boss_hurt.png" id="boss_hurt"]
+[ext_resource type="Texture2D" path="res://assets/sprites/enemies/boss_death.png" id="boss_death"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("boss_idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("boss_idle_2")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 2.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("boss_idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("boss_idle_2")
+}],
+"loop": true,
+"name": &"run",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("boss_attack_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("boss_attack_2")
+}],
+"loop": true,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("boss_hurt")
+}],
+"loop": false,
+"name": &"hurt",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("boss_death")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}]

@@ -38,6 +38,7 @@ TESTS=(
 	"战斗手感自测(FSM+常量+Combo)"  "scripts/tests/combat_self_test.gd"
 	"Boss系统自测(BT+阶段+HPBar)"   "scripts/tests/boss_self_test.gd"
 	"死亡系统测试"                  "scripts/tests/death_system_test.gd"
+	"行为冒烟(玩家移动+FSM启动)"    "scripts/tests/behavior_smoke_test.gd"
 )
 
 run_test() {

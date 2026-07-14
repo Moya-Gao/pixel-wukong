@@ -7,7 +7,7 @@ extends "res://scripts/player/states/state_base.gd"
 func enter(data: Dictionary = {}) -> void:
 	player.is_hurt = true
 	player.hurt_timer = player.HURT_DURATION
-	player.knockback_velocity = data.get("knockback", Vector2.ZERO)
+	player.knockback_velocity = data.get("knockback", Vector2.ZERO) * player.KNOCKBACK_FORCE
 
 	# 取消当前攻击/格挡状态（如果有）
 	if player.is_attacking:

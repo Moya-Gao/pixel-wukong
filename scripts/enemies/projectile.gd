@@ -46,15 +46,13 @@ func _process(delta: float) -> void:
 		queue_free()
 
 
-func _on_body_entered(body: Node2D) -> void:
+func _on_area_entered(area: Area2D) -> void:
 	if _has_hit:
 		return
-	# 只命中玩家，忽略场景里的其他 body（墙壁 / 其他敌人）
-	if not body.is_in_group("player"):
+	# 走 hurtbox 链路：命中 player_hurtbox → player._on_hurtbox_area_entered 处理伤害+格挡
+	# projectile 只负责自毁 + 通知反馈系统，不直接调 take_damage
+	if not area.is_in_group("player_hurtbox"):
 		return
-
-	if body.has_method("take_damage"):
-		body.take_damage(damage, -direction)
 
 	hit_player.emit(damage)
 	_has_hit = true

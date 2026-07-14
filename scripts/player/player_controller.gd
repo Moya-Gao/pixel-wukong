@@ -275,7 +275,10 @@ func _on_hurtbox_area_entered(area: Area2D) -> void:
 	if not can_take_damage(): return
 	var enemy := area.get_parent()
 	var damage := 10
-	if "stats" in enemy and enemy.stats: damage = enemy.stats.attack_damage
+	if "stats" in enemy and enemy.stats:
+		damage = enemy.stats.attack_damage
+	elif "damage" in enemy:
+		damage = enemy.damage  # projectile 等无 stats 的敌人直接暴露 damage 属性
 	var knockback_dir := global_position.direction_to(enemy.global_position) * -1
 	if is_perfect_blocking():
 		if enemy.has_method("apply_stun"): enemy.apply_stun(0.5)

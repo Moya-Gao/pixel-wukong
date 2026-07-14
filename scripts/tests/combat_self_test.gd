@@ -79,6 +79,17 @@ func _load_scene() -> void:
 		_fsm.name if _fsm else "N/A",
 	])
 
+	# L0: FSM 初始化完整性（Bug 回顾：setup() 未进入初始状态导致玩家无法移动）
+	if _fsm:
+		if _fsm.state_instance != null:
+			print("  ✅ FSM 已初始化")
+		else:
+			print("  ❌ FSM.state_instance 为 null！setup() 未进入初始状态！")
+		if _fsm.current_state == PlayerState.State.IDLE:
+			print("  ✅ FSM 初始状态: IDLE")
+		else:
+			print("  ❌ FSM 当前状态异常: %d" % _fsm.current_state)
+
 
 # ================================================================
 #  L1: FSM 转换穷举测试（保留，已验证有效）

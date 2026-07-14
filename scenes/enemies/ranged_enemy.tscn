@@ -66,7 +66,7 @@ color = Color(0, 0, 0, 0.3)
 
 [node name="Hurtbox" type="Area2D" parent="."]
 collision_layer = 4
-collision_mask = 0
+collision_mask = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]
 shape = SubResource("CircleShape2D_hurtbox")

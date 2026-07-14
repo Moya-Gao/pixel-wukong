@@ -176,6 +176,9 @@ func _get_state(state: PlayerState.State) -> StateBase:
 var _player_ref: CharacterBody2D = null
 
 
-## 由 PlayerController._ready 调用，建立 player 引用
+## 由 PlayerController._ready 调用，建立 player 引用并进入初始状态
 func setup(player: CharacterBody2D) -> void:
 	_player_ref = player
+	# 绕过 can_transition（初始进入不需要转换白名单检查）
+	state_instance = _get_state(PlayerState.State.IDLE)
+	state_instance.enter({})

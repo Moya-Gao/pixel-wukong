@@ -216,9 +216,10 @@ func take_damage(damage: int, knockback_dir: Vector2 = Vector2.ZERO) -> void:
 
 # ========== 重写受伤处理（支持霸体）==========
 func _start_hurt(knockback_dir: Vector2) -> void:
-	# 霸体：击退减弱
-	var kb := knockback_dir * stats.knockback_force * (1.0 - boss_stats.poise_resistance)
-	super._start_hurt(kb)
+	# 先让 EnemyBase 设置 velocity = knockback_dir * knockback_force
+	super._start_hurt(knockback_dir)
+	# 再施加霸体减成（避免二次乘法导致击退爆炸）
+	velocity *= (1.0 - boss_stats.poise_resistance)
 
 
 # ========== 重写眩晕处理 ==========

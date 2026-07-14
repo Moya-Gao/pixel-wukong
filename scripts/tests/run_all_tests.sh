@@ -41,6 +41,7 @@ TESTS=(
 	"行为冒烟(玩家移动+FSM启动)"    "scripts/tests/behavior_smoke_test.gd"
 	"格挡行为(④远程格挡+回归)"      "scripts/tests/behavior_block_test.gd"
 	"Boss行为(Bug2造伤+Bug3击退)"   "scripts/tests/behavior_boss_test.gd"
+	"击退行为(Bug⑤方向+量级)"       "scripts/tests/behavior_knockback_test.gd"
 )
 
 run_test() {

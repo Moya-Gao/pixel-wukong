@@ -277,8 +277,10 @@ func _on_hurtbox_area_entered(area: Area2D) -> void:
 	var damage := 10
 	if "stats" in enemy and enemy.stats:
 		damage = enemy.stats.attack_damage
+	elif "damage" in area:
+		damage = area.damage  # projectile: damage 在 Area2D 自身（tscn 根节点），非父节点
 	elif "damage" in enemy:
-		damage = enemy.damage  # projectile 等无 stats 的敌人直接暴露 damage 属性
+		damage = enemy.damage
 	var knockback_dir := global_position.direction_to(enemy.global_position) * -1
 	if is_perfect_blocking():
 		if enemy.has_method("apply_stun"): enemy.apply_stun(0.5)

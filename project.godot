@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="像素悟空"
 config/description="一款像素风格的动作游戏，灵感来源于《黑神话：悟空》"
-run/main_scene="res://scenes/levels/test_level.tscn"
+run/main_scene="res://scenes/levels/boss_arena.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 

@@ -214,6 +214,9 @@ func _show_poise_ripple(enemy: Node) -> void:
 
 
 func _spawn_damage_number(pos: Vector2, damage: int, _is_enemy_hit: bool) -> void:
+	# headless 测试环境 current_scene 可能为 null（SceneTree 直接实例化场景，不走 change_scene）
+	if not get_tree() or not get_tree().current_scene:
+		return
 	var node: DamageNumber = DAMAGE_NUMBER_SCENE.instantiate()
 	get_tree().current_scene.add_child(node)
 	node.global_position = pos

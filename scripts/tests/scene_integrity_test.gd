@@ -35,7 +35,11 @@ var _results := {
 	"fsm_init": {"passed": 0, "failed": 0, "details": []},
 	"node_exist": {"passed": 0, "failed": 0, "details": []},
 	"knockback": {"passed": 0, "failed": 0, "details": []},
+	"cross_entity": {"passed": 0, "failed": 0, "details": []},
 }
+
+# 跨实体验证：收集所有场景的碰撞剖面，最后做双向配对检查
+var _collision_profiles := []  # Array[{scene, node_path, node_name, layer, mask}]
 
 
 func _init() -> void:
@@ -82,6 +86,10 @@ func _test_collision_layers() -> void:
 
 	print("  L1 碰撞层: %d 通过, %d 失败" % [_results.collision.passed, _results.collision.failed])
 
+	# 跨实体双向配对：验证角色间碰撞层真正互通（不是只看单节点属性）
+	_verify_cross_entity_pairs()
+	print("  L1+ 跨实体: %d 通过, %d 失败" % [_results.cross_entity.passed, _results.cross_entity.failed])
+
 
 func _check_node_recursive(node: Node, scene_name: String, root: Node) -> void:
 	# 检查当前节点
@@ -100,6 +108,15 @@ func _check_area_collision(area: Area2D, scene_name: String, _root: Node) -> voi
 	var layer := area.collision_layer
 	var mask := area.collision_mask
 
+	# 收集碰撞剖面，供跨实体双向配对验证
+	_collision_profiles.append({
+		"scene": scene_name,
+		"node_path": node_path,
+		"node_name": area.name,
+		"layer": layer,
+		"mask": mask,
+	})
+
 	match area.name:
 		"Hurtbox":
 			# Hurtbox 的 mask 不能为 0（必须监听对面的 Hitbox）
@@ -110,6 +127,12 @@ func _check_area_collision(area: Area2D, scene_name: String, _root: Node) -> voi
 			# Hurtbox 的 layer 必须在已知层上
 			if not _is_known_layer(layer):
 				_fail("collision", "%s / %s: Hurtbox collision_layer=%d（不在已知层 1/2/4/8 上）" % [scene_name, node_path, layer])
+			else:
+				_pass("collision")
+			# 双向验证：Hurtbox 的 mask 必须含 LAYER_HITBOX(8)，
+			# 确保能真正被对面 Hitbox 检测到（mask=2 的 hurtbox 能过 mask≠0 但收不到攻击判定）
+			if not _mask_includes(mask, LAYER_HITBOX):
+				_fail("collision", "双向失败: %s / %s Hurtbox collision_mask=%d 不含 HITBOX 层(8)——无法被攻击命中" % [scene_name, node_path, mask])
 			else:
 				_pass("collision")
 
@@ -137,6 +160,14 @@ func _check_area_collision(area: Area2D, scene_name: String, _root: Node) -> voi
 			else:
 				_pass("collision")
 
+		_:
+			# 未知 Area2D 命名（如 "Projectile"）：不匹配任何已知规则的节点
+			# 至少验证 collision_layer 在已知层上，避免非标准命名完全跳过检查（漏报）
+			if not _is_known_layer(layer):
+				_fail("collision", "%s / %s: 未知Area2D '%s' collision_layer=%d 不在已知层 0/1/2/4/8 上" % [scene_name, node_path, area.name, layer])
+			else:
+				_pass("collision")
+
 
 func _check_body_collision(body: CharacterBody2D, scene_name: String) -> void:
 	var node_path := _get_node_path(body)
@@ -146,6 +177,107 @@ func _check_body_collision(body: CharacterBody2D, scene_name: String) -> void:
 	else:
 		_pass("collision")
 
+
+# ================================================================
+#  L1+ 跨实体双向配对验证
+# ================================================================
+
+func _verify_cross_entity_pairs() -> void:
+	var prof := _collision_profiles
+	if prof.size() == 0:
+		_results.cross_entity.details.append("⚠️ 无碰撞剖面数据，跳过跨实体验证")
+		return
+
+	# 从剖面中找出每个场景的 key Area2D 节点
+	var scenes = {}  # String → Dictionary
+	for entry in prof:
+		var s = entry.scene
+		if not scenes.has(s):
+			scenes[s] = {}
+		var kind = entry.node_name
+		if not scenes[s].has(kind):
+			scenes[s][kind] = []
+		scenes[s][kind].append(entry)
+
+	# 绑定：从 node_name 猜角色类型
+	# 玩家: player.tscn → 所有 Area2D 都是玩家的
+	# Boss: black_bear_boss.tscn → 所有 Area2D 都是 Boss 的
+	# grunt/ranged_enemy → 所有 Area2D 都是对应敌人的
+	# projectile → 所有 Area2D 都是投射物的
+
+	# 验证规则：对每对交互实体 (source, target)，source.Hitbox 的 mask 含 target.Hurtbox 的 layer
+	# 已知交互对：
+	#   player.Hitbox ↔ boss.Hurtbox, grunt.Hurtbox, ranged.Hurtbox
+	#   boss.Hitbox ↔ player.Hurtbox
+	#   grunt.Hitbox ↔ player.Hurtbox
+	#   ranged.Hitbox ↔ player.Hurtbox
+	#   projectile.any ↔ player.Hurtbox
+
+	var pairs := [
+		{
+			"source": "player.tscn", "targets": ["black_bear_boss.tscn", "grunt.tscn", "ranged_enemy.tscn"],
+			"desc": "玩家Hitbox → 敌人Hurtbox"
+		},
+		{
+			"source": "black_bear_boss.tscn", "targets": ["player.tscn"],
+			"desc": "BossHitbox → 玩家Hurtbox"
+		},
+		{
+			"source": "grunt.tscn", "targets": ["player.tscn"],
+			"desc": "GruntHitbox → 玩家Hurtbox"
+		},
+		{
+			"source": "ranged_enemy.tscn", "targets": ["player.tscn"],
+			"desc": "RangedHitbox → 玩家Hurtbox"
+		},
+		# projectile 使用 body_entered 信号而非 area-overlap（Hurtbox），
+		# 属于独立碰撞路径——不在本次 melee 双向配对的验证范围内。
+		# 如后续改为 area-overlap 模式，取消下面注释即可纳入验证。
+		# {
+		# 	"source": "projectile.tscn", "targets": ["player.tscn"],
+		# 	"desc": "Projectile → 玩家Hurtbox"
+		# },
+	]
+
+	for pair in pairs:
+		var src_scene = pair.source
+		var tgt_scenes: Array = pair.targets
+		var desc = pair.desc
+
+		if not scenes.has(src_scene):
+			continue  # 场景不存在，跳过
+
+		# 找 source 的 Hitbox
+		var src_areas: Array = scenes[src_scene].get("Hitbox", [])
+		if src_areas.size() == 0:
+			# 只有显式命名 Hitbox 的才参与跨实体验证
+			# DetectionArea / Projectile（body_entered 链路）不是 melee Hitbox，跳过
+			continue
+
+		if src_areas.size() == 0:
+			continue
+
+		for tgt_scene in tgt_scenes:
+			if not scenes.has(tgt_scene):
+				continue
+
+			var tgt_areas: Array = scenes[tgt_scene].get("Hurtbox", [])
+			if tgt_areas.size() == 0:
+				continue
+
+			# 对每一对 source_area × target_area 验证双向配对
+			for sa in src_areas:
+				var sa_mask: int = sa.mask
+				for ta in tgt_areas:
+					var ta_layer: int = ta.layer
+					# 验证: source(Hitbox).mask 必须包含 target(Hurtbox).layer
+					if _mask_includes(sa_mask, ta_layer):
+						_pass("cross_entity")
+					else:
+						_fail("cross_entity",
+							"跨实体失败: %s: %s[%s:%d].mask=%d 不含 %s[Hurtbox].layer=%d" % [
+								desc, src_scene, sa.node_name, sa.layer, sa_mask, tgt_scene, ta_layer
+							])
 
 # ================================================================
 #  L2: 必要节点检查
@@ -389,6 +521,7 @@ func _generate_report() -> void:
 
 	for cat in [
 		["1. 碰撞层/掩码", "collision"],
+		["1+. 跨实体双向配对", "cross_entity"],
 		["2. 必要节点", "node_exist"],
 		["3. FSM 初始化", "fsm_init"],
 		["4. 击退物理边界", "knockback"],
@@ -437,9 +570,9 @@ func _print_results() -> void:
 	var tf := 0
 	print("\n========================================")
 	print("  场景完整性自测完成")
-	for key in ["collision", "node_exist", "fsm_init", "knockback"]:
+	for key in ["collision", "cross_entity", "node_exist", "fsm_init", "knockback"]:
 		var data: Dictionary = r[key]
-		var names := {"collision": "L1 碰撞层", "node_exist": "L2 必要节点", "fsm_init": "L3 FSM初始化", "knockback": "L4 击退物理"}
+		var names := {"collision": "L1 碰撞层", "cross_entity": "L1+ 跨实体", "node_exist": "L2 必要节点", "fsm_init": "L3 FSM初始化", "knockback": "L4 击退物理"}
 		print("  %s: %d 通过 / %d 失败" % [names.get(key, key), data.passed, data.failed])
 		tp += data.passed
 		tf += data.failed

@@ -53,11 +53,12 @@ static func trigger_by_attack_type(tree: SceneTree, attack_type: String) -> void
 
 
 static func _find_or_create(tree: SceneTree) -> HitStop:
-	# 尝试在场景根节点下找已有的 HitStop
+	# headless 测试环境 current_scene 可能为 null（SceneTree 直接实例化场景，不走 change_scene）
+	if not tree or not tree.current_scene:
+		return null
 	for child in tree.current_scene.get_children():
 		if child is HitStop:
 			return child
-	# 没有就创建一个
 	var hs := HitStop.new()
 	hs.name = "HitStop"
 	tree.current_scene.add_child(hs)

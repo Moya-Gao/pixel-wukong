@@ -313,6 +313,14 @@ func _assert_hit_effect() -> void:
 	_fsm.transition_to(PlayerState.State.IDLE)
 	await _wait_frames(2)
 
+	# 重置到已知状态：满血 + 清除受击/无敌帧标记
+	# 防止前一步（如 3b 的 enemy._physics_process）命中玩家后
+	# 残留的 is_hurt / 血量降低污染 3c 断言（"假绿"根因）
+	p.is_hurt = false
+	p.is_dead = false
+	p.is_invincible = false
+	p.current_health = 100
+
 	var hp_before: int = p.current_health
 	p.take_damage(15, Vector2(-1, 0))
 	await _wait_frames(3)

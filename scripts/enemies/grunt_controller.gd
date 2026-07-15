@@ -218,6 +218,12 @@ func _check_rush_hit() -> bool:
 	if dist <= rush_range:
 		var knockback := rush_direction
 		var total_damage := stats.attack_damage + RUSH_DAMAGE_BONUS
+		# ⑥ fix: rush was bypassing player block/perfect-block (same class as ④)
+		if target.has_method("is_perfect_blocking") and target.is_perfect_blocking():
+			apply_stun(0.5)
+			return true
+		if target.get("is_blocking") == true:
+			total_damage = total_damage / 2
 		target.take_damage(total_damage, knockback)
 		return true
 	return false

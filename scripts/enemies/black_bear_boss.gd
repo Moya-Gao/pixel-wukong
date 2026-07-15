@@ -133,6 +133,7 @@ func _build_attack_seq(atk_name: String, atk_range: float, cooldown: float, _atk
 ## 普攻：熊掌横扫
 func _do_swipe() -> void:
 	is_attacking = true
+	_current_attack_name = ATK_SWIPE
 	attack_timer = SWIPE_DURATION
 	velocity = Vector2.ZERO
 	_activate_hitbox()
@@ -141,6 +142,7 @@ func _do_swipe() -> void:
 ## 二连击：左右开弓
 func _do_swipe_combo() -> void:
 	is_attacking = true
+	_current_attack_name = ATK_SWIPE_COMBO
 	attack_timer = SWIPE_COMBO_DURATION
 	velocity = Vector2.ZERO
 	_activate_hitbox()
@@ -155,6 +157,7 @@ func _do_swipe_combo() -> void:
 ## 地裂：跳起 → 砸地 AoE
 func _do_slam() -> void:
 	is_attacking = true
+	_current_attack_name = ATK_SLAM
 	attack_timer = SLAM_DURATION
 	velocity = Vector2.ZERO
 	_activate_hitbox()
@@ -182,6 +185,7 @@ func _do_slam() -> void:
 ## 突进冲撞
 func _do_charge() -> void:
 	_is_charging = true
+	_current_attack_name = ATK_CHARGE
 	attack_timer = CHARGE_DURATION
 	is_attacking = true
 
@@ -198,6 +202,7 @@ func _do_charge() -> void:
 ## 狂暴连击（P3 专属）
 func _do_berserk() -> void:
 	is_attacking = true
+	_current_attack_name = ATK_BERSERK
 	attack_timer = BERSERK_DURATION
 	velocity = Vector2.ZERO
 	_activate_hitbox()

@@ -160,7 +160,8 @@ func _do_slam() -> void:
 	_current_attack_name = ATK_SLAM
 	attack_timer = SLAM_DURATION
 	velocity = Vector2.ZERO
-	_activate_hitbox()
+	# ⑩ fix: hitbox 延迟到落地激活，避免抬手挨打
+	# _activate_hitbox() → 移到 tween callback 里
 
 	# 视觉跳跃效果
 	var original_y := sprite_root.position.y if sprite_root else 0.0
@@ -169,6 +170,8 @@ func _do_slam() -> void:
 		t.tween_property(sprite_root, "position:y", original_y - 30, 0.25)
 		t.tween_property(sprite_root, "position:y", original_y, 0.3)
 		t.tween_callback(func():
+			# 落地时才激活 hitbox（⑩ fix）
+			_activate_hitbox()
 			# 落地震动
 			if get_tree():
 				var shake := _get_screen_shake()

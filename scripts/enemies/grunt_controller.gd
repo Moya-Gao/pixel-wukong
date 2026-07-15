@@ -20,8 +20,10 @@ const RUSH_CHARGE_TIME: float = 0.3   # 蓄力时间
 const RUSH_SPEED: float = 500.0       # 突进速度
 const RUSH_DAMAGE_BONUS: int = 5      # 额外伤害
 var rush_charge_timer: float = 0.0
+var rush_flight_timer: float = 0.0  # ⑨: 冲刺最大飞行时间，防永久冲
 var rush_direction: Vector2 = Vector2.ZERO
 var rush_has_dealt_damage: bool = false
+const RUSH_MAX_FLIGHT: float = 0.5  # ⑨: 冲刺最大飞行秒数（charge 后）
 
 
 func _ready() -> void:
@@ -178,6 +180,7 @@ func _start_rush_attack() -> void:
 	_show_attack_telegraph()
 	is_rushing = true
 	rush_charge_timer = RUSH_CHARGE_TIME
+	rush_flight_timer = RUSH_MAX_FLIGHT  # ⑨: 重置飞行超时
 	rush_has_dealt_damage = false
 	velocity = Vector2.ZERO
 
@@ -198,13 +201,14 @@ func _process_rush(delta: float) -> void:
 
 	# 冲刺阶段：高速移动
 	velocity = rush_direction * RUSH_SPEED
+	rush_flight_timer -= delta
 
 	# 碰撞检测：用 enlarged hitbox 判定
 	if not rush_has_dealt_damage and _check_rush_hit():
 		rush_has_dealt_damage = true
 
-	# 冲刺结束条件：撞到玩家 or 飞行超 0.3s
-	if rush_has_dealt_damage:
+	# 冲刺结束条件：撞到玩家 or 飞行超时
+	if rush_has_dealt_damage or rush_flight_timer <= 0:
 		_end_rush()
 
 
@@ -218,6 +222,9 @@ func _check_rush_hit() -> bool:
 	if dist <= rush_range:
 		var knockback := rush_direction
 		var total_damage := stats.attack_damage + RUSH_DAMAGE_BONUS
+		# ⑧ fix: rush was bypassing player dodge invincibility (distance check, not area overlap)
+		if target.has_method("can_take_damage") and not target.can_take_damage():
+			return false
 		# ⑥ fix: rush was bypassing player block/perfect-block (same class as ④)
 		if target.has_method("is_perfect_blocking") and target.is_perfect_blocking():
 			apply_stun(0.5)

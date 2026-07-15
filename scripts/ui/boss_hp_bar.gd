@@ -5,11 +5,11 @@ class_name BossHPBar
 extends CanvasLayer
 
 # ========== 常量 ==========
-const BAR_WIDTH: float = 200.0
-const BAR_HEIGHT: float = 16.0
-const BAR_Y: float = 30.0
-const NAME_Y: float = 8.0
-const PHASE_Y: float = 50.0
+const BAR_WIDTH: float = 140.0
+const BAR_HEIGHT: float = 12.0
+const BAR_Y: float = 24.0
+const NAME_Y: float = 6.0
+const PHASE_Y: float = 38.0
 
 const BG_COLOR := Color(0.1, 0.1, 0.1, 0.8)
 const HP_COLORS: Array[Color] = [
@@ -44,7 +44,7 @@ func _ready() -> void:
 
 	# 面板
 	_panel = Panel.new()
-	_panel.size = Vector2(BAR_WIDTH + 40, 80)
+	_panel.size = Vector2(BAR_WIDTH + 28, 58)
 	_panel.position = Vector2(0, 0)
 	_panel.visible = false
 	add_child(_panel)
@@ -65,32 +65,32 @@ func _ready() -> void:
 
 	# Boss 名称
 	_name_label = Label.new()
-	_name_label.position = Vector2(20, NAME_Y)
-	_name_label.size = Vector2(BAR_WIDTH, 20)
-	_name_label.add_theme_font_size_override("font_size", 14)
+	_name_label.position = Vector2(14, NAME_Y)
+	_name_label.size = Vector2(BAR_WIDTH, 16)
+	_name_label.add_theme_font_size_override("font_size", 11)
 	_name_label.add_theme_color_override("font_color", Color.WHITE)
 	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_panel.add_child(_name_label)
 
 	# 血条背景
 	_hp_bg = ColorRect.new()
-	_hp_bg.position = Vector2(20, BAR_Y)
+	_hp_bg.position = Vector2(14, BAR_Y)
 	_hp_bg.size = Vector2(BAR_WIDTH, BAR_HEIGHT)
 	_hp_bg.color = BG_COLOR
 	_panel.add_child(_hp_bg)
 
 	# 血条填充
 	_hp_fill = ColorRect.new()
-	_hp_fill.position = Vector2(20, BAR_Y)
+	_hp_fill.position = Vector2(14, BAR_Y)
 	_hp_fill.size = Vector2(BAR_WIDTH, BAR_HEIGHT)
 	_hp_fill.color = HP_COLORS[0]
 	_panel.add_child(_hp_fill)
 
 	# 血量数字
 	_hp_label = Label.new()
-	_hp_label.position = Vector2(20, BAR_Y)
+	_hp_label.position = Vector2(14, BAR_Y)
 	_hp_label.size = Vector2(BAR_WIDTH, BAR_HEIGHT)
-	_hp_label.add_theme_font_size_override("font_size", 10)
+	_hp_label.add_theme_font_size_override("font_size", 9)
 	_hp_label.add_theme_color_override("font_color", Color.WHITE)
 	_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hp_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -98,9 +98,9 @@ func _ready() -> void:
 
 	# 阶段指示器
 	_phase_label = Label.new()
-	_phase_label.position = Vector2(20, PHASE_Y)
-	_phase_label.size = Vector2(BAR_WIDTH, 18)
-	_phase_label.add_theme_font_size_override("font_size", 11)
+	_phase_label.position = Vector2(14, PHASE_Y)
+	_phase_label.size = Vector2(BAR_WIDTH, 16)
+	_phase_label.add_theme_font_size_override("font_size", 9)
 	_phase_label.add_theme_color_override("font_color", Color(0.9, 0.7, 0.3))
 	_phase_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_panel.add_child(_phase_label)

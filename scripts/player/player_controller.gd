@@ -7,6 +7,9 @@
 
 extends CharacterBody2D
 
+## 玩家血量变化信号（player_hp_bar.gd 监听）
+signal player_health_changed(current: int, max_hp: int)
+
 # ========== 节点引用 ==========
 @onready var sprite_root: Node2D = $SpriteRoot
 @onready var animated_sprite: AnimatedSprite2D = $SpriteRoot/AnimatedSprite2D
@@ -139,6 +142,14 @@ func _ready() -> void:
 
 	_setup_combo_hud()
 
+	# 玩家血条 UI（右上角 CanvasLayer）
+	var hp_bar := preload("res://scripts/ui/player_hp_bar.gd").new()
+	hp_bar.name = "PlayerHPBar"
+	add_child(hp_bar)
+
+	# 初始血量通知（player_hp_bar 等 UI 监听）
+	player_health_changed.emit(current_health, max_health)
+
 
 func _physics_process(delta: float) -> void:
 	if dodge_cooldown_timer > 0:
@@ -199,6 +210,7 @@ func get_current_attack_type() -> String:
 func take_damage(damage: int, knockback_dir: Vector2) -> void:
 	if is_hurt or is_dead: return
 	current_health = maxi(current_health - damage, 0)
+	player_health_changed.emit(current_health, max_health)
 	if current_health <= 0:
 		fsm.transition_to(PlayerState.State.DEAD)
 	else:

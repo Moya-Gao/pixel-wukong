@@ -8,10 +8,10 @@ class_name AttackScreenFX
 
 # ========== 常量 ==========
 const LAYER := 25
-const VIGNETTE_PEAK := Color(0.04, 0.0, 0.08, 1.0)
-const ATTACK_IN := 0.05
-const ATTACK_HOLD := 0.10
-const ATTACK_OUT := 0.25
+const VIGNETTE_PEAK := Color(0.04, 0.0, 0.08, 0.25)
+const ATTACK_IN := 0.03
+const ATTACK_HOLD := 0.05
+const ATTACK_OUT := 0.12
 const HEAVY_KEYWORDS := ["slam", "charge", "berserk", "combo", "heavy"]
 
 # ========== 视觉节点 ==========

@@ -25,7 +25,7 @@ func update_visual() -> void:
 		var offset_dir := 1 if player.facing_right else -1
 		player.sprite_root.position.x = player.visual_offset_x * offset_dir
 		player.sprite_root.position.y = -player.jump_height
-		player.sprite_root.scale.x = 1 if player.facing_right else -1
+		player.sprite_root.scale.x = -1 if player.facing_right else 1
 
 	# 阴影透明度（跳跃越高越淡）
 	if player.shadow:
